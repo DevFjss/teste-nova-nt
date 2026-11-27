@@ -1,0 +1,3956 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nota Técnica - CDF</title>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg-body: #eef4fb;
+      --bg-surface: #ffffff;
+      --bg-header: #d8e6f6;
+      --text-primary: #07192d;
+      --text-secondary: #2b4768;
+      --border-color: #9fb8d4;
+      --accent-color: #0b4f9c;
+      --accent-hover: #083b75;
+      --accent-contrast: #ffffff;
+      --row-hover: #e7f1fc;
+      --row-selected: #cfe3fa;
+      --gold-filter: #ffd700;
+      --shadow: 0 2px 10px rgba(7, 25, 45, 0.10);
+
+      --title-color: #062547;
+      --title-accent: #0b4f9c;
+      --card1-bg: #dbeafe;
+      --card1-border: #1d4ed8;
+      --card2-bg: #d1fae5;
+      --card2-border: #047857;
+      --expand-bg: #f4f8fd;
+
+      --gen-card1-bg: #ffedd5;
+      --gen-card1-border: #c2410c;
+      --gen-card2-bg: #ccfbf1;
+      --gen-card2-border: #0f766e;
+      --gen-card3-bg: #e0e7ff;
+      --gen-card3-border: #3730a3;
+
+      --th-ident-bg: #0b2545;
+      --th-faed-bg: #7c2d12;
+      --th-faed-sub: #9a3412;
+      --th-alim-bg: #0f4c5c;
+      --th-alim-sub: #136f63;
+
+      --badge-bg: #dbeafe;
+      --badge-text: #083b75;
+      --badge-border: #0b4f9c;
+    }
+
+    [data-theme="dark"] {
+      --bg-body: #05080f;
+      --bg-surface: #0b1322;
+      --bg-header: #122038;
+      --text-primary: #f1f7ff;
+      --text-secondary: #a8c2e0;
+      --border-color: #243b5e;
+      --accent-color: #1d70b8;
+      --accent-hover: #2b87d6;
+      --accent-contrast: #ffffff;
+      --row-hover: #11213a;
+      --row-selected: #142f57;
+      --gold-filter: #ffd700;
+      --shadow: 0 4px 16px rgba(0, 0, 0, 0.72);
+
+      --title-color: #e6f2ff;
+      --title-accent: #4da6ff;
+      --card1-bg: #0e2444;
+      --card1-border: #4da6ff;
+      --card2-bg: #082f28;
+      --card2-border: #2dd4bf;
+      --expand-bg: #080f1c;
+
+      --gen-card1-bg: #2c1308;
+      --gen-card1-border: #fb923c;
+      --gen-card2-bg: #072926;
+      --gen-card2-border: #2dd4bf;
+      --gen-card3-bg: #111c44;
+      --gen-card3-border: #818cf8;
+
+      --th-ident-bg: #071326;
+      --th-faed-bg: #4a1908;
+      --th-faed-sub: #6b240c;
+      --th-alim-bg: #092c38;
+      --th-alim-sub: #0d3f4d;
+
+      --badge-bg: #0d2747;
+      --badge-text: #93c5fd;
+      --badge-border: #3b82f6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 18px;
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      box-shadow: var(--shadow);
+      z-index: 20;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .topbar-left, .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .panel-header-block {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .panel-title {
+      background: transparent;
+      color: var(--title-color);
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      line-height: 1.15;
+    }
+
+    .panel-title svg {
+      width: 22px;
+      height: 22px;
+      color: var(--title-accent);
+      flex-shrink: 0;
+    }
+
+    .tabs-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background-color: var(--bg-body);
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .tab-btn {
+      padding: 6px 14px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-primary);
+      background-color: var(--row-hover);
+    }
+
+    .tab-btn.active {
+      background-color: var(--accent-color);
+      color: var(--accent-contrast);
+      border-color: var(--accent-color);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+    }
+
+    .btn {
+      padding: 7px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: var(--bg-surface);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+
+    .btn:hover:not(:disabled) {
+      background-color: var(--row-hover);
+      border-color: var(--accent-color);
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background-color: var(--accent-color);
+      color: var(--accent-contrast);
+      border-color: var(--accent-color);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    .btn-orange {
+      background-color: #c2410c;
+      color: #ffffff;
+      border-color: #c2410c;
+    }
+
+    .btn-orange:hover:not(:disabled) {
+      background-color: #9a3412;
+    }
+
+    .btn-teal {
+      background-color: #0f766e;
+      color: #ffffff;
+      border-color: #0f766e;
+    }
+
+    .btn-teal:hover:not(:disabled) {
+      background-color: #115e59;
+    }
+
+    .btn-indigo {
+      background-color: #3730a3;
+      color: #ffffff;
+      border-color: #3730a3;
+    }
+
+    .btn-indigo:hover:not(:disabled) {
+      background-color: #312e81;
+    }
+
+    .btn-danger {
+      background-color: #b91c1c;
+      color: #ffffff;
+      border-color: #b91c1c;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background-color: #991b1b;
+    }
+
+    .cards-container {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .kpi-card {
+      border: 1px solid var(--border-color);
+      border-left: 5px solid var(--card1-border);
+      background-color: var(--card1-bg);
+      border-radius: 6px;
+      padding: 3px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 145px;
+      height: 42px;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .kpi-card.valor-card {
+      background-color: var(--card2-bg);
+      border-left-color: var(--card2-border);
+      min-width: 185px;
+    }
+
+    .kpi-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      font-weight: 800;
+    }
+
+    .kpi-value {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+
+    .tab-view {
+      display: none;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .tab-view.active {
+      display: flex;
+    }
+
+    .sidebar {
+      width: 280px;
+      background-color: var(--bg-surface);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      transition: width 0.25s ease;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .sidebar.collapsed {
+      width: 0;
+      border-right: none;
+    }
+
+    .sidebar-header {
+      padding: 11px 14px;
+      font-weight: 800;
+      font-size: 12px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-color);
+      background-color: var(--bg-header);
+    }
+
+    .sidebar-program-btn {
+      width: 100%;
+      margin-top: 9px;
+      padding: 9px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #0f766e;
+      border-radius: 7px;
+      background: linear-gradient(135deg, #0f766e, #0d9488);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 800;
+      text-align: left;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(15, 118, 110, .22);
+      transition: filter .15s, transform .15s;
+    }
+    .sidebar-program-btn:hover { filter: brightness(1.10); transform: translateY(-1px); }
+    .sidebar-program-btn:focus-visible { outline: 2px solid #f59e0b; outline-offset: 2px; }
+
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .validation-group {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      overflow: hidden;
+      background-color: var(--bg-body);
+    }
+
+    .validation-title {
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      background-color: var(--bg-header);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+
+    .validation-title .badge {
+      background-color: var(--gold-filter);
+      color: #000000;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 10px;
+      display: none;
+    }
+
+    .validation-title.has-filter .badge {
+      display: inline-block;
+    }
+
+    .validation-body {
+      padding: 8px;
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      background-color: var(--bg-surface);
+    }
+
+    .validation-group.open .validation-body {
+      display: flex;
+    }
+
+    .validation-search {
+      width: 100%;
+      padding: 5px 8px;
+      font-size: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background-color: var(--bg-body);
+      color: var(--text-primary);
+    }
+
+    .validation-list {
+      max-height: 155px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-size: 12px;
+    }
+
+    .validation-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 3px;
+      color: var(--text-primary);
+    }
+
+    .validation-item:hover {
+      background-color: var(--row-hover);
+    }
+
+    .content-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 12px;
+      gap: 8px;
+    }
+
+    .table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .manut-access-title {
+      margin: 4px 0 10px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary, inherit);
+    }
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .file-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .expandable-box {
+      background-color: var(--expand-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .expandable-header {
+      padding: 7px 12px;
+      background-color: var(--bg-header);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+
+    .expandable-body {
+      display: none;
+      padding: 10px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .expandable-box.open .expandable-body {
+      display: grid;
+    }
+
+    @media (max-width: 900px) {
+      .expandable-body {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .condition-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .condition-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .condition-select {
+      padding: 4px 6px;
+      font-size: 12px;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-body);
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .condition-textarea {
+      width: 100%;
+      height: 64px;
+      resize: vertical;
+      padding: 6px 8px;
+      font-size: 12px;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-body);
+      color: var(--text-primary);
+    }
+
+    .condition-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .condition-hint {
+      font-size: 10px;
+      color: var(--text-secondary);
+    }
+
+    .btn-sm {
+      padding: 4px 8px;
+      font-size: 11px;
+    }
+
+    .table-container {
+      flex: 1;
+      overflow: auto;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+
+    thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background-color: var(--bg-header);
+    }
+
+    th {
+      padding: 9px 11px;
+      border-bottom: 2px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    th:last-child {
+      border-right: none;
+    }
+
+    .sortable-th {
+      cursor: pointer;
+    }
+
+    .sortable-th:hover {
+      filter: brightness(0.96);
+    }
+
+    .th-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .th-label-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .sort-indicator {
+      font-size: 10px;
+      opacity: 0.55;
+    }
+
+    th.sorted-asc .sort-indicator,
+    th.sorted-desc .sort-indicator {
+      opacity: 1;
+      color: var(--accent-color);
+      font-weight: 900;
+    }
+
+    .funnel-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      padding: 3px 5px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      transition: all 0.15s;
+    }
+
+    .funnel-btn:hover {
+      background-color: rgba(128, 128, 128, 0.16);
+      color: var(--text-primary);
+    }
+
+    .funnel-btn.active-filter {
+      background-color: var(--gold-filter) !important;
+      color: #000000 !important;
+      border-color: #b8860b;
+      box-shadow: 0 0 4px rgba(255, 215, 0, 0.75);
+    }
+
+    .matrix-funnel { color: inherit; }
+    .funnel-btn svg {
+      width: 13px;
+      height: 13px;
+      fill: currentColor;
+    }
+
+    td {
+      padding: 7px 11px;
+      border-bottom: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+      white-space: nowrap;
+      color: var(--text-primary);
+    }
+
+    td:last-child {
+      border-right: none;
+    }
+
+    td.num-col {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    tbody tr:hover {
+      background-color: var(--row-hover);
+    }
+
+    tbody tr.row-checked {
+      background-color: var(--row-selected);
+    }
+
+    .generated-area, .history-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 14px 18px;
+      gap: 12px;
+    }
+
+    .gen-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    @media (max-width: 900px) {
+      .gen-cards-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .gen-kpi-card {
+      background-color: var(--gen-card1-bg);
+      border: 1px solid var(--border-color);
+      border-left: 6px solid var(--gen-card1-border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .gen-kpi-card.alim-card {
+      background-color: var(--gen-card2-bg);
+      border-left-color: var(--gen-card2-border);
+    }
+
+    .gen-kpi-card.total-card {
+      background-color: var(--gen-card3-bg);
+      border-left-color: var(--gen-card3-border);
+    }
+
+    .gen-kpi-title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .gen-kpi-amount {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .gen-actions-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .gen-actions-left, .gen-actions-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .gen-panel-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .gen-panel-header {
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      background-color: var(--bg-surface);
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .gen-panel-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pill-badge {
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      border: 1px solid var(--badge-border);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 999px;
+    }
+
+    .gen-rules-panel {
+      display: none;
+      padding: 10px 14px;
+      background-color: var(--expand-bg);
+      border-bottom: 1px solid var(--border-color);
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-primary);
+    }
+
+    .gen-rules-panel.open {
+      display: flex;
+    }
+
+    .rule-field {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .rule-field input {
+      padding: 4px 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background-color: var(--bg-surface);
+      color: var(--text-primary);
+      font-size: 12px;
+      width: 175px;
+    }
+
+    .gen-table-scroll {
+      flex: 1;
+      overflow: auto;
+    }
+
+    table.matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    table.matrix-table thead th {
+      color: #ffffff;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      padding: 7px 8px;
+      font-size: 11px;
+    }
+
+    table.matrix-table thead tr:first-child th.grp-ident {
+      background-color: var(--th-ident-bg);
+    }
+
+    table.matrix-table thead tr:first-child th.grp-faed {
+      background-color: var(--th-faed-bg);
+    }
+
+    table.matrix-table thead tr:first-child th.grp-alim {
+      background-color: var(--th-alim-bg);
+    }
+
+    table.matrix-table thead tr:nth-child(2) th.sub-faed {
+      background-color: var(--th-faed-sub);
+    }
+
+    table.matrix-table thead tr:nth-child(2) th.sub-alim {
+      background-color: var(--th-alim-sub);
+    }
+
+    table.matrix-table tbody td {
+      padding: 6px 8px;
+      font-size: 12px;
+    }
+
+    table.matrix-table tbody td.num-col {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .history-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .history-item {
+      border: 1px solid var(--border-color);
+      border-left: 5px solid var(--accent-color);
+      border-radius: 8px;
+      padding: 12px 14px;
+      background-color: var(--expand-bg);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .history-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .history-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .history-sub {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .history-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-popover {
+      position: fixed;
+      width: 270px;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      z-index: 1000;
+      padding: 10px;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .filter-popover.open {
+      display: flex;
+    }
+
+    .popover-header {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .popover-search {
+      width: 100%;
+      padding: 6px 8px;
+      font-size: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background-color: var(--bg-body);
+      color: var(--text-primary);
+    }
+
+    .popover-hint {
+      font-size: 10px;
+      color: var(--text-secondary);
+    }
+
+    .popover-list {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-size: 12px;
+    }
+
+    .popover-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-secondary);
+    }
+
+    .toast-notice {
+      position: fixed;
+      bottom: 16px;
+      right: 18px;
+      background-color: var(--accent-color);
+      color: var(--accent-contrast);
+      padding: 9px 15px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      box-shadow: var(--shadow);
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .toast-notice.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media print {
+      .topbar, .sidebar, .gen-actions-bar, .gen-rules-panel, .toast-notice, .sum-row-del-btn {
+        display: none !important;
+      }
+      body, .tab-view.active, .generated-area, .gen-panel-wrapper, .gen-table-scroll {
+        height: auto !important;
+        overflow: visible !important;
+      }
+    }
+    :root { color-scheme: light; }
+    [data-theme="dark"] { color-scheme: dark; }
+    body { height: 100vh; height: 100dvh; }
+    .tab-view { min-height: 0; }
+    .sidebar-backdrop { display: none; }
+    #dataTable { table-layout: fixed; border-collapse: separate; border-spacing: 0; min-width: 1270px; }
+    #dataTable td { height: 34px; box-sizing: border-box; padding: 0 11px; overflow: hidden; text-overflow: ellipsis; }
+    #dataTable th:first-child, #dataTable td:first-child { text-align: center; padding: 0; }
+    #dataTable tr.spacer td { height: auto; padding: 0; border: 0; }
+    #dataTable tr.spacer td.empty-state { padding: 40px 20px; white-space: normal; }
+    .vl-more { font-size: 11px; color: var(--text-secondary); padding: 4px; }
+    .validation-item span { overflow-wrap: anywhere; }
+    @media (max-width: 900px) {
+      .topbar { padding: 8px 10px; }
+      .topbar-right, .tabs-bar { width: 100%; }
+      .tabs-bar { overflow-x: auto; }
+      .sidebar { position: fixed; top: 0; bottom: 0; left: 0; width: min(88vw, 330px); z-index: 60; transition: transform 0.25s ease; }
+      .sidebar.collapsed { width: min(88vw, 330px); transform: translateX(-105%); }
+      .sidebar:not(.collapsed) + .sidebar-backdrop { display: block; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); z-index: 50; }
+      .content-area, .generated-area, .history-area { padding: 8px; }
+      .btn { padding: 9px 12px; }
+      .rule-field, .rule-field input { width: 100%; }
+    }
+    @media (max-width: 600px) {
+      .panel-title { font-size: 17px; }
+      .topbar-left { width: 100%; }
+      .cards-container .kpi-card { flex: 1; min-width: 0; }
+      .gen-kpi-amount { font-size: 18px; }
+    }
+    #dataTable th { position: relative; }
+    .col-resizer { position: absolute; top: 0; right: 0; bottom: 0; width: 10px; cursor: col-resize; touch-action: none; z-index: 2; }
+    .col-resizer::after { content: ''; position: absolute; top: 25%; bottom: 25%; right: 4px; width: 2px; border-radius: 1px; background: var(--border-color); transition: background 0.15s; }
+    .col-resizer:hover::after, .col-resizer.dragging::after { background: var(--accent-color); }
+    body.col-resizing { cursor: col-resize; user-select: none; }
+    #dataTable th:first-child, #dataTable td:first-child { position: sticky; left: 0; }
+    #dataTable td:first-child { z-index: 2; background: var(--bg-surface); }
+    #dataTable th:first-child { z-index: 12; background: var(--bg-header); }
+    #dataTable tbody tr:hover td:first-child { background: var(--row-hover); }
+    #dataTable tbody tr.row-checked td:first-child { background: var(--row-selected); }
+    #dataTable tr.spacer td:first-child { position: static; }
+    table.matrix-table .gen-check-th { position: sticky; left: 0; z-index: 12; width: 40px; min-width: 40px; }
+    table.matrix-table td.gen-check-td { position: sticky; left: 0; z-index: 2; width: 40px; min-width: 40px; padding: 0; text-align: center; background: var(--bg-surface); box-shadow: inset -1px 0 0 var(--border-color); }
+    table.matrix-table tbody tr:hover td.gen-check-td { background: var(--row-hover); }
+    table.matrix-table tbody tr.row-checked td { background: var(--row-selected); }
+    .gen-cards-grid { grid-template-columns: repeat(4, 1fr); }
+    .gen-kpi-card.sel-card { background-color: var(--card1-bg); border-left-color: var(--card1-border); }
+    @media (max-width: 900px) { .gen-cards-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px) { .gen-cards-grid { grid-template-columns: 1fr; } }
+
+    .sum-actions { gap: 8px; flex-wrap: wrap; padding: 10px 14px; border-bottom: 1px solid var(--border-color); }
+    .sum-select { background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 7px 10px; font-size: 13px; }
+    .sum-hint { font-size: 12px; color: var(--text-secondary); }
+    .sum-scroll { padding: 12px; }
+    #summarySheet { background: #fff; display: inline-block; min-width: 100%; padding: 6px; color: #000; border-radius: 6px; }
+    .sum-table { border-collapse: collapse; font-family: Calibri, Arial, sans-serif; font-size: 12px; color: #000; }
+    .sum-table th, .sum-table td { border: 1px solid #222; padding: 4px 8px; text-align: center; white-space: nowrap; background: #fff; }
+    .sum-table .s-grey { background: #d9d9d9; font-weight: 700; }
+    .sum-table .s-beige { background: #ebf1de; font-weight: 700; }
+    .sum-table .s-peach { background: #fce4d6; font-weight: 700; }
+    .sum-table .s-sm { white-space: normal; font-size: 10px; min-width: 105px; }
+    .sum-table .s-name { text-align: left; min-width: 220px; }
+    .sum-table td.s-num { text-align: right; min-width: 105px; font-variant-numeric: tabular-nums; }
+    .sum-table tr.s-total td { font-weight: 700; }
+    .sum-table .s-gap td { border: 0; height: 14px; background: #fff !important; }
+    .sum-table .s-fill { background: #ebf1de !important; border: 1px solid #222; }
+    .sum-table .s-fill-grey { background: #d9d9d9 !important; border: 1px solid #222; }
+    .sum-table .s-box { border-top: 0; border-left: 0; background: #fff !important; }
+    .sum-table th.s-lbl { background: #d9d9d9 !important; font-weight: 700; }
+    .sum-table th.s-lbl-main { background: #ebf1de !important; font-weight: 700; }
+    .sum-table td.s-tot-block { text-align: center; font-weight: 700; min-width: 125px; font-variant-numeric: tabular-nums; }
+    .sum-row-del-btn {
+      margin-left: 6px;
+      border: 1px solid #b91c1c;
+      background: #fee2e2;
+      color: #991b1b;
+      border-radius: 4px;
+      padding: 0 5px;
+      font-size: 10px;
+      font-weight: 800;
+      cursor: pointer;
+      vertical-align: middle;
+    }
+  .sum-row-del-btn:hover { background: #fecaca; }
+  .sum-row-edit-btn { margin-left: 6px; border: 1px solid #2563eb; background: #dbeafe; color: #1d4ed8; border-radius: 4px; padding: 2px 6px; font-size: 11px; font-weight: 800; cursor: pointer; vertical-align: middle; }
+  .sum-edit-dialog { position: fixed; inset: auto; margin: 0; width: min(760px, calc(100vw - 24px)); max-height: 90vh; border: 1px solid #94a3b8; border-radius: 12px; padding: 0; color: #0f172a; }
+  .sum-edit-dialog::backdrop { background: rgba(2, 6, 23, .16); }
+  .sum-edit-form { padding: 0 18px 18px; }
+  .sum-edit-drag-handle { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 -18px 14px; padding: 14px 18px; background: #e2e8f0; border-radius: 11px 11px 0 0; cursor: move; touch-action: none; user-select: none; }
+  .sum-edit-drag-handle h2 { font-size: 18px; }
+  .sum-edit-drag-handle span { font-size: 12px; color: #475569; }
+  .sum-edit-grid { display: grid; grid-template-columns: 1fr; gap: 12px; max-height: 62vh; overflow: auto; padding: 4px; }
+  .sum-edit-field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 700; }
+  .sum-edit-field input { width: 100%; min-width: 0; padding: 8px; border: 1px solid #94a3b8; border-radius: 6px; }
+  .sum-edit-group { min-width: 0; margin: 0; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; }
+  .sum-edit-group legend { padding: 0 6px; font-size: 13px; font-weight: 800; }
+  .sum-edit-years { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+  .sum-edit-actions { display: flex; justify-content: flex-end; gap: 8px; padding-top: 14px; }
+  @media (max-width: 600px) { .sum-edit-years { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media print {
+      @page { size: A4 landscape; margin: 10mm; }
+      .sum-actions { display: none !important; }
+      .sum-scroll { padding: 0; }
+    }
+    #summarySheet .sum-table th, #summarySheet .sum-table td, #summarySheet .sum-table b { color: #000 !important; text-shadow: none; }
+    #summarySheet .sum-table th.s-lbl-main, #summarySheet .sum-table td.s-beige, #summarySheet .sum-table th.s-beige { background: #ebf1de !important; }
+    #summarySheet .sum-table th.s-lbl, #summarySheet .sum-table th.s-grey, #summarySheet .sum-table td.s-grey { background: #d9d9d9 !important; }
+    #summarySheet .sum-table th.s-peach { background: #fce4d6 !important; }
+    #summarySheet .sum-table th.s-cyan { background: #bbccf0 !important; font-weight: 700; }
+
+    #manutTable th { position:sticky; top:0; z-index:2; white-space:nowrap; cursor:pointer; }
+    #manutTable td { white-space:nowrap; }
+    #manutTable tbody tr.manut-selected { background:var(--row-selected); }
+    #manutTable th .sort-indicator { margin-left:5px; opacity:.75; }
+    #manutTable th.manut-sorted { color:var(--gold-filter); }
+    #manutTable th:first-child, #manutTable td:first-child { position:sticky; left:0; z-index:3; background:var(--bg-surface); }
+    .manut-sidebar { min-width:280px; }
+    .manut-filter-help { padding:5px 2px; }
+    #manutThead th { position:sticky; top:0; z-index:5; white-space:nowrap; }
+    #manutThead .manut-th-inner { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    #manutThead .manut-th-label { cursor:pointer; }
+    #manutThead .manut-funnel { border:1px solid var(--border-color); border-radius:4px; padding:3px 6px; color:var(--text-primary); background:var(--bg-surface); cursor:pointer; }
+    #manutThead .manut-funnel.active { background:var(--gold-filter); color:#111; border-color:var(--gold-filter); }
+    #manutThead .manut-filter-pop { position:absolute; top:100%; left:0; min-width:230px; max-width:300px; padding:8px; background:var(--bg-surface); color:var(--text-primary); border:1px solid var(--border-color); border-radius:7px; box-shadow:0 8px 24px rgba(0,0,0,.35); z-index:30; white-space:normal; }
+    #manutThead .manut-filter-pop[hidden] { display:none; }
+    #manutThead .manut-filter-search { width:100%; padding:7px; margin-bottom:6px; border:1px solid var(--border-color); border-radius:5px; background:var(--bg-body); color:var(--text-primary); }
+    #manutThead .manut-filter-list { max-height:210px; overflow:auto; display:flex; flex-direction:column; gap:3px; }
+    #manutThead .manut-filter-item { display:flex; align-items:center; gap:7px; padding:3px 4px; cursor:pointer; font-weight:500; }
+    #manutThead .manut-filter-item:hover { background:var(--row-hover); }
+    #manutThead th.manut-filter-active { color:var(--gold-filter); }
+
+    #gerTable th { position:sticky; top:0; z-index:2; white-space:nowrap; cursor:pointer; }
+    #gerTable td { white-space:nowrap; }
+    #gerTable th .sort-indicator { margin-left:5px; opacity:.75; }
+    #gerTable th:first-child, #gerTable td:first-child { position:sticky; left:0; z-index:3; background:var(--bg-surface); }
+    #gerTable th:first-child { z-index:5; cursor:default; }
+    #gerTable tbody tr.ger-selected { background:var(--row-selected); }
+    #gerTable tbody tr.ger-selected td:first-child { background:var(--row-selected); }
+    #gerTable td.ger-num { text-align:right; font-variant-numeric:tabular-nums; }
+    #gerThead .manut-th-inner { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    #gerThead .manut-th-label { cursor:pointer; }
+    #gerThead .manut-funnel { border:1px solid var(--border-color); border-radius:4px; padding:3px 6px; color:var(--text-primary); background:var(--bg-surface); cursor:pointer; }
+    #gerThead .manut-funnel.active { background:var(--gold-filter); color:#111; border-color:var(--gold-filter); }
+    #gerThead .manut-filter-pop { position:absolute; top:100%; left:0; min-width:230px; max-width:300px; padding:8px; background:var(--bg-surface); color:var(--text-primary); border:1px solid var(--border-color); border-radius:7px; box-shadow:0 8px 24px rgba(0,0,0,.35); z-index:30; white-space:normal; }
+    #gerThead .manut-filter-pop[hidden] { display:none; }
+    #gerThead .manut-filter-search { width:100%; padding:7px; margin-bottom:6px; border:1px solid var(--border-color); border-radius:5px; background:var(--bg-body); color:var(--text-primary); }
+    #gerThead .manut-filter-list { max-height:210px; overflow:auto; display:flex; flex-direction:column; gap:3px; }
+    #gerThead .manut-filter-item { display:flex; align-items:center; gap:7px; padding:3px 4px; cursor:pointer; font-weight:500; }
+    #gerThead .manut-filter-actions { display:flex; justify-content:flex-end; gap:6px; margin-top:8px; }
+    #gerThead .manut-filter-item:hover { background:var(--row-hover); }
+    #gerThead th.manut-filter-active { color:var(--gold-filter); }
+    @media(max-width:900px) { .manut-sidebar { position:relative !important; top:auto !important; bottom:auto !important; left:auto !important; z-index:1 !important; transform:none !important; min-width:190px; width:190px; } }
+    @media(max-width:700px) { .manut-sidebar { width:210px; } }
+
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="btn" id="toggleSidebarBtn" title="Recolher / Reexibir Menu Lateral">
+        ☰ Menu Filtros
+      </button>
+
+      <div class="panel-header-block">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="8" y1="13" x2="16" y2="13"></line>
+            <line x1="8" y1="17" x2="13" y2="17"></line>
+          </svg>
+          <span>Nota Técnica - CDF</span>
+        </div>
+
+        <div class="cards-container" id="baseTopCards">
+          <div class="kpi-card">
+            <span class="kpi-label" id="countCardLabel">Registros (Visíveis)</span>
+            <span class="kpi-value" id="countCardValue">0</span>
+          </div>
+          <div class="kpi-card valor-card">
+            <span class="kpi-label" id="sumCardLabel">Soma Valor (Visíveis)</span>
+            <span class="kpi-value" id="sumCardValue">R$ 0,00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="tabs-bar" aria-label="Navegação do Painel">
+      <button class="tab-btn active" data-tab="baseTab">📋 Base / Filtros</button>
+      <button class="tab-btn" data-tab="generatedTab">📊 Dados Gerados</button>
+      <button class="tab-btn" data-tab="summaryTab">🧾 Resumo <span class="pill-badge" id="summaryTabCount">0</span></button>
+      <button class="tab-btn" data-tab="historyTab">🗂️ Histórico <span class="pill-badge" id="historyTabCount">0</span></button>
+    </nav>
+
+    <div class="topbar-right">
+      <button class="btn" id="clearFiltersBtn">🧹 Limpar Filtros</button>
+      <button class="btn" id="refreshBtn">🔄 Atualizar</button>
+      <button class="btn" id="themeToggleBtn">🌙 Tema Azul / Preto</button>
+    </div>
+  </header>
+
+  <div class="tab-view active" id="baseTab">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span>Listas de Validação</span>
+        <button type="button" class="sidebar-program-btn" id="sidebarProgramasManutBtn" title="Abrir a tabela Programas Manutenção">
+          🛠️ <span>DADOS BASE MANUTENÇÃO</span>
+        </button>
+        <button type="button" class="sidebar-program-btn" id="sidebarGeradorBtn" title="Abrir a tabela Gerador Manutenção 2027">
+          ⚙️ <span>GERADOR MANUTENÇÃO 2027</span>
+        </button>
+      </div>
+      <div class="sidebar-content" id="sidebarValidationContainer"></div>
+    </aside>
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <main class="content-area">
+      <div class="table-toolbar">
+        <div class="toolbar-group">
+          <label for="xlsxInput" class="btn btn-primary">📂 Carregar Planilha (.xlsx)</label>
+          <input type="file" id="xlsxInput" accept=".xlsx, .xls" />
+          <span class="file-name" id="fileNameDisplay">A carregar do Supabase...</span>
+        </div>
+
+        <button class="btn btn-orange" id="goToGeneratedBtn">
+          ⚡ Gerar Dados na Aba Resultado
+        </button>
+      </div>
+
+      <div class="expandable-box" id="expandableFilterBox">
+        <div class="expandable-header" id="expandableHeader">
+          <span>▾ Filtro Rápido por Colagem em Lote (3 Condições — Correspondência Exata)</span>
+          <span id="expandableStatus">Expandir</span>
+        </div>
+        <div class="expandable-body">
+          <div class="condition-card">
+            <div class="condition-top">
+              <span>Condição 1 — Coluna:</span>
+              <select class="condition-select" data-cond="0">
+                <option value="CODIGO" selected>CODIGO</option>
+                <option value="INEP">INEP</option>
+                <option value="NTE">NTE</option>
+                <option value="MUNICIPIO">MUNICIPIO</option>
+                <option value="UNIDADE ESCOLAR">UNIDADE ESCOLAR</option>
+                <option value="VALOR">VALOR</option>
+                <option value="FONTE">FONTE</option>
+              </select>
+            </div>
+            <textarea class="condition-textarea" data-cond="0" placeholder="Cole vários valores aqui (um por linha ou separados por vírgula/ponto e vírgula)..."></textarea>
+            <div class="condition-actions">
+              <span class="condition-hint">Filtra ao digitar (valor exato)</span>
+              <button class="btn btn-sm clear-cond-btn" data-cond="0">Limpar</button>
+            </div>
+          </div>
+
+          <div class="condition-card">
+            <div class="condition-top">
+              <span>Condição 2 — Coluna:</span>
+              <select class="condition-select" data-cond="1">
+                <option value="MUNICIPIO" selected>MUNICIPIO</option>
+                <option value="NTE">NTE</option>
+                <option value="CODIGO">CODIGO</option>
+                <option value="INEP">INEP</option>
+                <option value="UNIDADE ESCOLAR">UNIDADE ESCOLAR</option>
+                <option value="VALOR">VALOR</option>
+                <option value="FONTE">FONTE</option>
+              </select>
+            </div>
+            <textarea class="condition-textarea" data-cond="1" placeholder="Cole vários valores aqui (ex: BARRA, ITABUNA)..."></textarea>
+            <div class="condition-actions">
+              <span class="condition-hint">Filtra ao digitar (valor exato)</span>
+              <button class="btn btn-sm clear-cond-btn" data-cond="1">Limpar</button>
+            </div>
+          </div>
+
+          <div class="condition-card">
+            <div class="condition-top">
+              <span>Condição 3 — Coluna:</span>
+              <select class="condition-select" data-cond="2">
+                <option value="FONTE" selected>FONTE</option>
+                <option value="NTE">NTE</option>
+                <option value="MUNICIPIO">MUNICIPIO</option>
+                <option value="CODIGO">CODIGO</option>
+                <option value="INEP">INEP</option>
+                <option value="UNIDADE ESCOLAR">UNIDADE ESCOLAR</option>
+                <option value="VALOR">VALOR</option>
+              </select>
+            </div>
+            <textarea class="condition-textarea" data-cond="2" placeholder="Cole vários valores aqui..."></textarea>
+            <div class="condition-actions">
+              <span class="condition-hint">Filtra ao digitar (valor exato)</span>
+              <button class="btn btn-sm clear-cond-btn" data-cond="2">Limpar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table id="dataTable">
+          <colgroup><col style="width:40px"><col style="width:90px"><col style="width:170px"><col style="width:110px"><col style="width:120px"><col style="width:380px"><col style="width:130px"><col style="width:230px"></colgroup>
+          <thead>
+            <tr>
+              <th style="width: 36px; text-align: center;">
+                <input type="checkbox" id="selectAllRows" title="Selecionar todas as linhas da base" />
+              </th>
+              <th class="sortable-th" data-col="NTE" data-sort-key="NTE">
+                <div class="th-content">
+                  <span class="th-label-group"><span>NTE</span><span class="sort-indicator">⇅</span></span>
+                  <button class="funnel-btn" data-col="NTE" title="Filtrar NTE">
+                    <svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8L3 4z"/></svg>
+                  </button>
+                </div>
+              </th>
+              <th class="sortable-th" data-col="MUNICIPIO" data-sort-key="MUNICIPIO">
+                <div class="th-content">
+                  <span class="th-label-group"><span>MUNICÍPIO</span><span class="sort-indicator">⇅</span></span>
+                  <button class="funnel-btn" data-col="MUNICIPIO" title="Filtrar Município">
+                    <svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8L3 4z"/></svg>
+                  </button>
+                </div>
+              </th>
+              <th class="sortable-th" data-col="CODIGO" data-sort-key="CODIGO">
+                <div class="th-content">
+                  <span class="th-label-group"><span>CÓDIGO SEC</span><span class="sort-indicator">⇅</span></span>
+                  <button class="funnel-btn" data-col="CODIGO" title="Filtrar Código SEC">
+                    <svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8L3 4z"/></svg>
+                  </button>
+                </div>
+              </th>
+              <th class="sortable-th" data-col="INEP" data-sort-key="INEP">
+                <div class="th-content">
+                  <span class="th-label-group"><span>CÓDIGO INEP</span><span class="sort-indicator">⇅</span></span>
+                  <button class="funnel-btn" data-col="INEP" title="Filtrar Código INEP">
+                    <svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8L3 4z"/></svg>
+                  </button>
+                </div>
+              </th>
+              <th class="sortable-th" data-col="UNIDADE ESCOLAR" data-sort-key="UNIDADE ESCOLAR">
+                <div class="th-content">
+                  <span class="th-label-group"><span>UNIDADE ESCOLAR</span><span class="sort-indicator">⇅</span></span>
+                  <button class="funnel-btn" data-col="UNIDADE ESCOLAR" title="Filtrar Unidade Escolar">
+                    <svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8L3 4z"/></svg>
+                  </button>
+                </div>
+              </th>
+              <th class="sortable-th" data-col="VALOR" data-sort-key="_numericValor">
+                <div class="th-content">
+                  <span class="th-label-group"><span>VALOR</span><span class="sort-indicator">⇅</span></span>
+                  <button class="funnel-btn" data-col="VALOR" title="Filtrar Valor">
+                    <svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8L3 4z"/></svg>
+                  </button>
+                </div>
+              </th>
+              <th class="sortable-th" data-col="FONTE" data-sort-key="FONTE">
+                <div class="th-content">
+                  <span class="th-label-group"><span>FONTE</span><span class="sort-indicator">⇅</span></span>
+                  <button class="funnel-btn" data-col="FONTE" title="Filtrar Fonte">
+                    <svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8L3 4z"/></svg>
+                  </button>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr>
+              <td colspan="8" class="empty-state">
+                A carregar dados de <strong>nota_tecnica</strong> no Supabase ou carregue uma planilha <strong>.xlsx</strong>.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+
+  <div class="tab-view" id="programasManutTab">
+    <aside class="sidebar manut-sidebar" id="manutSidebar">
+      <div class="sidebar-header">Menu de Navegação
+        <button type="button" class="sidebar-program-btn" id="manutSidebarProgramBtn" aria-current="page">🛠️ <span>PROGRAMAS MANUTENÇÃO</span></button>
+        <button type="button" class="sidebar-program-btn" id="manutSidebarGeradorBtn">⚙️ <span>GERADOR MANUTENÇÃO 2027</span></button>
+        <button type="button" class="btn" id="manutSidebarBaseBtn" style="width:100%;margin-top:8px">📋 BASE / FILTROS</button>
+      </div>
+      <div class="sidebar-content"><div class="validation-group open"><div class="validation-title">Programas Manutenção</div><div class="validation-body" style="display:flex"><span style="font-size:12px;color:var(--text-secondary)">Tabela independente do Supabase, com filtros de validação no cabeçalho.</span></div></div></div>
+    </aside>
+    <main class="content-area" style="width:100%;min-width:0">
+      <div class="table-toolbar">
+        <div class="toolbar-group">
+          <button class="btn btn-primary" id="manutRefreshBtn">🔄 Atualizar Manut</button>
+          <button class="btn" id="manutClearFiltersBtn">🧹 Limpar Filtros</button>
+          <span class="file-name" id="manutStatus">A carregar dados de manut_programa...</span>
+        </div>
+        <div class="toolbar-group">
+          <span class="pill-badge" id="manutCount">0 registros</span>
+          <span class="pill-badge" id="manutSelectedCount">0 selecionados</span>
+        </div>
+      </div>
+      <div class="cards-container" style="margin:8px 0 12px">
+        <div class="kpi-card"><span class="kpi-label">Registros visíveis</span><span class="kpi-value" id="manutVisibleCount">0</span></div>
+        <div class="kpi-card"><span class="kpi-label">Colunas</span><span class="kpi-value">17</span></div>
+      </div>
+      <div class="file-name manut-filter-help">Use o ícone de filtro no cabeçalho de cada coluna para abrir a lista de validação com caixas de seleção, como em Base / Filtros.</div>
+      <h2 class="manut-access-title" id="manutAccessTitle">🛠️ Acessando Programas de Manutenção</h2>
+      <div class="table-container" id="manutTableContainer">
+        <table id="manutTable" style="min-width:1900px">
+          <thead id="manutThead"></thead>
+          <tbody id="manutTbody"><tr><td class="empty-state">A carregar dados do Supabase...</td></tr></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <div class="tab-view" id="geradorManut2027Tab">
+    <aside class="sidebar manut-sidebar" id="gerSidebar">
+      <div class="sidebar-header">Menu de Navegação
+        <button type="button" class="sidebar-program-btn" id="gerSidebarProgramBtn">🛠️ <span>PROGRAMAS MANUTENÇÃO</span></button>
+        <button type="button" class="sidebar-program-btn" id="gerSidebarSelfBtn" aria-current="page">⚙️ <span>GERADOR MANUTENÇÃO 2027</span></button>
+        <button type="button" class="btn" id="gerSidebarBaseBtn" style="width:100%;margin-top:8px">📋 BASE / FILTROS</button>
+      </div>
+      <div class="sidebar-content"><div class="validation-group open"><div class="validation-title">Gerador Manutenção 2027</div><div class="validation-body" style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;color:var(--text-secondary)">Lê <b>backup_cartao_manut</b> (custeio e capital) do projeto principal e <b>backup_cartao_faed</b> / <b>backup_cartao_pnae</b> (só custeio; capital = 0,00) do projeto Automação CDF. Envia para a Base / Filtros com FONTE = GERADOR MANUTENÇÃO 2027, GERADOR FAED 2027 ou GERADOR PNAE 2027. Na Base, CUSTEIO + CAPITAL vira o VALOR.</span></div></div></div>
+    </aside>
+    <main class="content-area" style="width:100%;min-width:0">
+      <div class="table-toolbar">
+        <div class="toolbar-group">
+          <button class="btn btn-primary" id="gerRefreshBtn">🔄 Atualizar Gerador</button>
+          <button class="btn" id="gerClearFiltersBtn">🧹 Limpar Filtros</button>
+          <button class="btn btn-teal" id="gerToBaseBtn" title="Substitui na Base / Filtros as linhas das fontes GERADOR (Manutenção, FAED e PNAE) 2027">➡️ Enviar para Base / Filtros</button>
+          <span class="file-name" id="gerStatus">A carregar dados de backup_cartao_manut, backup_cartao_faed e backup_cartao_pnae...</span>
+        </div>
+        <div class="toolbar-group">
+          <span class="pill-badge" id="gerCount">0 registros</span>
+          <span class="pill-badge" id="gerSelectedCount">0 selecionados</span>
+        </div>
+      </div>
+      <div id="gerSourceInfo" style="display:flex;flex-direction:column;gap:4px;margin:8px 0 0;font-size:12px"></div>
+      <div class="cards-container" style="margin:8px 0 12px">
+        <div class="kpi-card"><span class="kpi-label">Registros visíveis</span><span class="kpi-value" id="gerVisibleCount">0</span></div>
+        <div class="kpi-card"><span class="kpi-label">Totais visíveis</span><span class="kpi-value" id="gerTotalValor" style="font-size:13px">Custeio R$ 0,00 • Capital R$ 0,00 • Total R$ 0,00</span></div>
+        <div class="kpi-card"><span class="kpi-label">Comparação com a Base (fontes 2027)</span><span class="kpi-value" id="gerDiffSummary" style="font-size:13px">—</span></div>
+      </div>
+      <div class="file-name manut-filter-help">Use o ícone ▼ no cabeçalho de cada coluna para filtrar. Fontes: <strong>GERADOR MANUTENÇÃO 2027</strong>, <strong>GERADOR FAED 2027</strong> e <strong>GERADOR PNAE 2027</strong>.</div>
+      <h2 class="manut-access-title">⚙️ Gerador Manutenção 2027</h2>
+      <div class="table-container" id="gerTableContainer">
+        <table id="gerTable" style="min-width:1100px">
+          <thead id="gerThead"></thead>
+          <tbody id="gerTbody"><tr><td class="empty-state">A carregar dados do Supabase...</td></tr></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <div class="tab-view" id="generatedTab">
+    <section class="generated-area">
+      <div class="gen-cards-grid">
+        <div class="gen-kpi-card">
+          <span class="gen-kpi-title">🛠️ FAED MANUTENÇÃO (TOTAL)</span>
+          <span class="gen-kpi-amount" id="genFaedTotalCard">R$ 0,00</span>
+        </div>
+        <div class="gen-kpi-card alim-card">
+          <span class="gen-kpi-title">🍽️ ALIMENTAÇÃO / PNAE (TOTAL)</span>
+          <span class="gen-kpi-amount" id="genAlimTotalCard">R$ 0,00</span>
+        </div>
+        <div class="gen-kpi-card total-card">
+          <span class="gen-kpi-title">📈 TOTAL GERAL (FAED + ALIM)</span>
+          <span class="gen-kpi-amount" id="genGrandTotalCard">R$ 0,00</span>
+        </div>
+        <div class="gen-kpi-card sel-card">
+          <span class="gen-kpi-title">✅ ESCOLAS SELECIONADAS</span>
+          <span class="gen-kpi-amount" id="genSelCountCard">0 de 0</span>
+        </div>
+      </div>
+
+      <div class="gen-actions-bar">
+        <div class="gen-actions-left">
+          <button class="btn btn-orange" id="regenerateMatrixBtn">🔄 Regerar e Acumular no Resumo</button>
+          <button class="btn btn-primary" id="saveHistoryBtn">💾 Salvar no Histórico</button>
+        </div>
+        <div class="gen-actions-right">
+          <button class="btn" id="exportGenPdfBtn">📄 Exportar PDF</button>
+          <button class="btn btn-primary" id="exportGenExcelBtn">📗 Exportar Excel (.xlsx)</button>
+        </div>
+      </div>
+
+      <div class="gen-panel-wrapper">
+        <div class="gen-panel-header">
+          <div class="gen-panel-title">
+            <span>🏫 Escolas Selecionadas (Dados Gerados)</span>
+          </div>
+          <span class="pill-badge" id="genSchoolsCountBadge">0 escolas</span>
+        </div>
+
+        <div class="gen-table-scroll">
+          <table class="matrix-table" id="generatedMatrixTable">
+            <thead>
+              <tr>
+                <th rowspan="2" class="grp-ident gen-check-th"><input type="checkbox" id="genSelectAll" title="Selecionar todas as escolas"></th>
+                <th rowspan="2" class="grp-ident sortable-th" data-matrix-sort="nte"><div class="th-content"><span class="th-label-group"><span>NTE</span><span class="sort-indicator">⇅</span></span><button type="button" class="funnel-btn matrix-funnel" data-mcol="nte" title="Filtrar NTE"><svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8L3 4z"/></svg></button></div></th>
+                <th rowspan="2" class="grp-ident sortable-th" data-matrix-sort="municipio"><div class="th-content"><span class="th-label-group"><span>Município</span><span class="sort-indicator">⇅</span></span><button type="button" class="funnel-btn matrix-funnel" data-mcol="municipio" title="Filtrar Município"><svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8L3 4z"/></svg></button></div></th>
+                <th rowspan="2" class="grp-ident sortable-th" data-matrix-sort="codigo"><div class="th-content"><span class="th-label-group"><span>Código SEC</span><span class="sort-indicator">⇅</span></span><button type="button" class="funnel-btn matrix-funnel" data-mcol="codigo" title="Filtrar Código SEC"><svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8L3 4z"/></svg></button></div></th>
+                <th rowspan="2" class="grp-ident sortable-th" data-matrix-sort="inep"><div class="th-content"><span class="th-label-group"><span>Código INEP</span><span class="sort-indicator">⇅</span></span><button type="button" class="funnel-btn matrix-funnel" data-mcol="inep" title="Filtrar Código INEP"><svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8L3 4z"/></svg></button></div></th>
+                <th rowspan="2" class="grp-ident sortable-th" data-matrix-sort="escola"><div class="th-content"><span class="th-label-group"><span>Unidade Escolar</span><span class="sort-indicator">⇅</span></span><button type="button" class="funnel-btn matrix-funnel" data-mcol="escola" title="Filtrar Unidade Escolar"><svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8L3 4z"/></svg></button></div></th>
+                <th colspan="5" class="grp-faed">FAED</th>
+                <th colspan="10" class="grp-alim">ALIMENTAÇÃO (PNAE)</th>
+              </tr>
+              <tr>
+                <th class="sub-faed sortable-th" data-matrix-sort="faed:2023">2023 <span class="sort-indicator">⇅</span></th>
+                <th class="sub-faed sortable-th" data-matrix-sort="faed:2024">2024 <span class="sort-indicator">⇅</span></th>
+                <th class="sub-faed sortable-th" data-matrix-sort="faed:2025">2025 <span class="sort-indicator">⇅</span></th>
+                <th class="sub-faed sortable-th" data-matrix-sort="faed:2026">2026 <span class="sort-indicator">⇅</span></th>
+                <th class="sub-faed sortable-th" data-matrix-sort="faed:2027">2027 <span class="sort-indicator">⇅</span></th>
+                <th class="sub-alim sortable-th" data-matrix-sort="fed:2023">Fed23 <span class="sort-indicator">⇅</span></th>
+                <th class="sub-alim sortable-th" data-matrix-sort="est:2023">Est23 <span class="sort-indicator">⇅</span></th>
+                <th class="sub-alim sortable-th" data-matrix-sort="fed:2024">Fed24 <span class="sort-indicator">⇅</span></th>
+                <th class="sub-alim sortable-th" data-matrix-sort="est:2024">Est24 <span class="sort-indicator">⇅</span></th>
+                <th class="sub-alim sortable-th" data-matrix-sort="fed:2025">Fed25 <span class="sort-indicator">⇅</span></th>
+                <th class="sub-alim sortable-th" data-matrix-sort="est:2025">Est25 <span class="sort-indicator">⇅</span></th>
+                <th class="sub-alim sortable-th" data-matrix-sort="fed:2026">Fed26 <span class="sort-indicator">⇅</span></th>
+                <th class="sub-alim sortable-th" data-matrix-sort="est:2026">Est26 <span class="sort-indicator">⇅</span></th>
+                <th class="sub-alim sortable-th" data-matrix-sort="fed:2027">Fed27 <span class="sort-indicator">⇅</span></th>
+                <th class="sub-alim sortable-th" data-matrix-sort="est:2027">Est27 <span class="sort-indicator">⇅</span></th>
+              </tr>
+            </thead>
+            <tbody id="generatedMatrixBody">
+              <tr>
+                <td colspan="21" class="empty-state">
+                  Aplique um filtro (ou marque linhas) na aba <strong>Base / Filtros</strong> para gerar a matriz por escola, programa e ano (2023 a 2027).
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="tab-view" id="summaryTab">
+    <section class="generated-area">
+      <div class="gen-panel-wrapper">
+        <div class="gen-panel-header">
+          <div class="gen-panel-title">
+            <span>🧾 Resumo de Repasses Escolares (2023 a 2027)</span>
+            <span class="pill-badge" id="sumInfoBadge">0 linhas</span>
+          </div>
+          <span class="sum-hint" id="sumHint">Acumule NTEs/Municípios ou gere o Resumo Geral da BAHIA em 1 clique.</span>
+        </div>
+        <div class="gen-actions-bar sum-actions">
+          <div class="gen-actions-left">
+            <select id="sumGroupBy" class="sum-select" title="Como identificar a consulta atual ao acumular">
+              <option value="auto">Acúmulo: Automático (Escola, NTE ou Município do filtro)</option>
+              <option value="nte">Forçar consulta atual como NTE</option>
+              <option value="municipio">Forçar consulta atual como Município</option>
+            <option value="escola">Forçar consulta atual como Escola (nome da unidade)</option>
+            </select>
+            <button class="btn btn-teal" id="sumAddCurrentBtn" title="Acumular imediatamente a seleção atual de Dados Gerados">➕ Acumular Consulta Atual</button>
+            <button class="btn btn-indigo" id="sumGenerateBahiaBtn" title="Consolidar toda a base (ou todo o acumulado) em uma única linha BAHIA">🌎 Gerar Resumo Geral (BAHIA)</button>
+            <button class="btn btn-danger" id="clearSummaryBtn" title="Zerar todas as linhas acumuladas no Resumo">🗑️ Limpar Resumo</button>
+          </div>
+          <div class="gen-actions-right">
+            <button class="btn btn-primary" id="exportSumExcelBtn">📗 Exportar Excel (.xlsx)</button>
+            <button class="btn" id="exportSumPdfBtn">📄 Exportar PDF</button>
+          </div>
+        </div>
+        <div class="gen-table-scroll sum-scroll"><div id="summarySheet"></div></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="tab-view" id="historyTab">
+    <section class="history-area">
+      <div class="gen-panel-wrapper">
+        <div class="gen-panel-header">
+          <div class="gen-panel-title">
+            <span>🗂️ Histórico de Gerados e Backups</span>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <span class="pill-badge" id="historyCountBadge">0 registros</span>
+            <button class="btn btn-sm btn-danger" id="clearHistoryBtn">🗑️ Limpar Histórico</button>
+          </div>
+        </div>
+        <div class="history-list" id="historyListContainer">
+          <div class="empty-state">
+            Nenhum backup salvo ainda. Na aba <strong>Dados Gerados</strong>, clique em <strong>Salvar no Histórico</strong> para guardar uma versão e gerar PDF ou Excel quando quiser.
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="filter-popover" id="filterPopover">
+    <div class="popover-header">
+      <span id="popoverTitle">Filtrar Coluna</span>
+      <span style="cursor:pointer;" id="closePopoverBtn">✕</span>
+    </div>
+    <input type="text" class="popover-search" id="popoverSearchInput" placeholder="Digite para filtrar..." autocomplete="off" />
+    <span class="popover-hint">* Busca ao digitar (ex: "bar" já traz "BARRA"). Não diferencia acentos/maiúsculas. A lista mostra só valores compatíveis com os outros filtros.</span>
+    <div class="popover-list" id="popoverList"></div>
+    <div class="popover-actions">
+      <button class="btn" id="popoverCancelBtn">Cancelar</button>
+      <button class="btn btn-primary" id="popoverApplyBtn">Aplicar</button>
+    </div>
+  </div>
+
+  <div class="filter-popover" id="matrixPopover">
+    <div class="popover-header">
+      <span id="mpTitle">Filtrar Coluna</span>
+      <span style="cursor:pointer;" id="mpCloseBtn">✕</span>
+    </div>
+    <input type="text" class="popover-search" id="mpSearch" placeholder="Digite para filtrar..." autocomplete="off" />
+    <span class="popover-hint">* Busca ao digitar. Não diferencia acentos/maiúsculas. A lista mostra só valores compatíveis com os outros filtros.</span>
+    <div class="popover-list" id="mpList"></div>
+    <div class="popover-actions">
+      <button class="btn" id="mpClearBtn">Limpar filtro</button>
+      <button class="btn btn-primary" id="mpApplyBtn">Aplicar</button>
+    </div>
+  </div>
+
+  <div class="toast-notice" id="toastNotice"></div>
+
+  <script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const SUPABASE_URL = "https://vsubudeifwpdzxwoayij.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_vrBHcx43pZg3MWhYv8Wl-w_hd09KwTP";
+    const SUPABASE_TABLE = "nota_tecnica";
+
+    const supabaseClient = (window.supabase && typeof window.supabase.createClient === 'function')
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+      : null;
+
+    const COLUMNS = ['NTE', 'MUNICIPIO', 'CODIGO', 'INEP', 'UNIDADE ESCOLAR', 'VALOR', 'FONTE'];
+    const YEARS = ['2023', '2024', '2025', '2026', '2027'];
+    const HISTORY_STORAGE_KEY = 'nota_tecnica_cdf_historico_v1';
+
+    let rawData = [];
+    let filteredData = [];
+    let generatedSchoolsList = [];
+    let generatedSchoolsFull = [];
+    let matrixFilters = {};
+    let selectedRowIds = new Set();
+    let historyItems = [];
+    let accumulatedSummaryItems = [];
+    let isBahiaConsolidatedMode = false;
+
+    let baseSortState = { key: null, dir: 'none' };
+    let matrixSortState = { key: null, dir: 'none' };
+
+    const xlsxInput = document.getElementById('xlsxInput');
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
+    const tableBody = document.getElementById('tableBody');
+    const selectAllRowsCheckbox = document.getElementById('selectAllRows');
+    const sidebar = document.getElementById('sidebar');
+    const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
+    const sidebarValidationContainer = document.getElementById('sidebarValidationContainer');
+    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+
+    const expandableFilterBox = document.getElementById('expandableFilterBox');
+    const expandableHeader = document.getElementById('expandableHeader');
+    const expandableStatus = document.getElementById('expandableStatus');
+
+    const countCardLabel = document.getElementById('countCardLabel');
+    const countCardValue = document.getElementById('countCardValue');
+    const sumCardLabel = document.getElementById('sumCardLabel');
+    const sumCardValue = document.getElementById('sumCardValue');
+
+    const filterPopover = document.getElementById('filterPopover');
+    const popoverTitle = document.getElementById('popoverTitle');
+    const popoverSearchInput = document.getElementById('popoverSearchInput');
+    const popoverList = document.getElementById('popoverList');
+    const closePopoverBtn = document.getElementById('closePopoverBtn');
+    const popoverCancelBtn = document.getElementById('popoverCancelBtn');
+    const popoverApplyBtn = document.getElementById('popoverApplyBtn');
+
+    const generatedMatrixBody = document.getElementById('generatedMatrixBody');
+    const genFaedTotalCard = document.getElementById('genFaedTotalCard');
+    const genAlimTotalCard = document.getElementById('genAlimTotalCard');
+    const genGrandTotalCard = document.getElementById('genGrandTotalCard');
+    const genSchoolsCountBadge = document.getElementById('genSchoolsCountBadge');
+    const historyListContainer = document.getElementById('historyListContainer');
+    const historyCountBadge = document.getElementById('historyCountBadge');
+    const historyTabCount = document.getElementById('historyTabCount');
+    const summaryTabCount = document.getElementById('summaryTabCount');
+    const toastNotice = document.getElementById('toastNotice');
+
+    function showToast(msg) {
+      toastNotice.textContent = msg;
+      toastNotice.classList.add('show');
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => toastNotice.classList.remove('show'), 2600);
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabId);
+      });
+      document.querySelectorAll('.tab-view').forEach(view => {
+        view.classList.toggle('active', view.id === tabId);
+      });
+      toggleSidebarBtn.style.visibility = tabId === 'baseTab' ? 'visible' : 'hidden';
+
+      if (tabId === 'baseTab') baseVT.refresh();
+      if (tabId === 'programasManutTab' && manutRows.length === 0) loadManutFromSupabase(false);
+      if (tabId === 'geradorManut2027Tab') { if (gerRows.length === 0) loadGeradorFromSupabase(false); else { gerComputeDiff(); renderGer(); } }
+      if (tabId === 'generatedTab') {
+        buildGeneratedMatrix(true);
+      } else if (tabId === 'summaryTab') {
+        if (!isBahiaConsolidatedMode) buildGeneratedMatrix(true);
+        renderSummary();
+      } else if (tabId === 'historyTab') {
+        renderHistoryList();
+      }
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+    document.getElementById('sidebarProgramasManutBtn').addEventListener('click', () => {
+      switchTab('programasManutTab');
+    });
+    document.getElementById('manutSidebarBaseBtn').addEventListener('click', () => switchTab('baseTab'));
+    document.getElementById('manutSidebarProgramBtn').addEventListener('click', () => switchTab('programasManutTab'));
+
+    document.getElementById('goToGeneratedBtn').addEventListener('click', () => {
+      switchTab('generatedTab');
+      showToast('Dados Gerados atualizados e acumulados no Resumo');
+    });
+
+
+    // ===== ABA PROGRAMAS MANUTENÇÃO (fonte independente no Supabase) =====
+    const MANUT_TABLE = 'manut_programa';
+    const MANUT_COLUMNS = [
+      ['nte','NTE'],['municipio','MUNICÍPIO'],['cod_sec','CÓDIGO SEC'],['ctro_custo','CENTRO DE CUSTO'],
+      ['cod_inep','CÓDIGO INEP'],['und_escolar','UNIDADE ESCOLAR'],['tipo_esc','TIPO DE ESCOLA'],
+      ['tempo_int','TEMPO INTEGRAL'],['comple_polie','COMPLEXO POLIESPORTIVO'],['educ_espe','EDUCAÇÃO ESPECIAL'],
+      ['cpa','CPA'],['cemit','CEMIT'],['ct_cjcc','CT CJCC'],['cpm','CPM'],['uab_polo','UAB / POLO'],
+      ['ct_educ_profi','CT EDUCAÇÃO PROFISSIONAL'],['ct_terri_educ_profi','CT TERRITÓRIO EDUCAÇÃO PROFISSIONAL']
+    ];
+    let manutRows = [], manutFiltered = [], manutFilters = {}, manutSelected = new Set(), manutSort = {key:'',dir:0};
+    const manutStatus = document.getElementById('manutStatus');
+    const manutThead = document.getElementById('manutThead');
+    const manutTbody = document.getElementById('manutTbody');
+    const manutTableContainer = document.getElementById('manutTableContainer');
+    const normManut = v => String(v ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+    const escManut = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+    function manutMatches(row, exceptKey='') {
+      return MANUT_COLUMNS.every(([key]) => key === exceptKey || !manutFilters[key] || manutFilters[key].has(String(row[key] ?? '')));
+    }
+    function manutAvailableValues(key) {
+      const seen = new Map();
+      manutRows.forEach(r => { if (manutMatches(r,key)) { const v=String(r[key] ?? ''); if(!seen.has(v)) seen.set(v,v); }});
+      return [...seen.values()].sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true,sensitivity:'base'}));
+    }
+    function manutBuildFilterList(key, search='') {
+      const values=manutAvailableValues(key), selected=manutFilters[key], q=normManut(search);
+      const shown=values.filter(v=>!q || normManut(v).includes(q));
+      const allChecked=shown.length>0 && shown.every(v=>!selected || selected.has(v));
+      return `<label class="manut-filter-item"><input type="checkbox" data-manut-all="${key}" ${allChecked?'checked':''}> <b>(Marcar / Desmarcar Todos)</b></label>`+
+        shown.map((v,i)=>`<label class="manut-filter-item"><input type="checkbox" data-manut-value="${i}" data-manut-col="${key}" ${!selected || selected.has(v)?'checked':''}> <span>${v===''?'(Vazio)':escManut(v)}</span></label>`).join('')+
+        (shown.length===0?'<div class="file-name">Nenhum valor encontrado.</div>':'');
+    }
+    function buildManutHeader(){
+      manutThead.innerHTML='<tr><th style="min-width:42px;text-align:center"><input type="checkbox" id="manutSelectAll" title="Selecionar todos"></th>'+MANUT_COLUMNS.map(([key,label])=>`<th data-manut-colhead="${key}"><div class="manut-th-inner"><span class="manut-th-label" data-manut-sort="${key}">${label} <span class="sort-indicator">⇅</span></span><button type="button" class="manut-funnel" data-manut-open="${key}" title="Lista de validação: ${label}">▼</button></div><div class="manut-filter-pop" data-manut-pop="${key}" hidden><input class="manut-filter-search" type="search" placeholder="Pesquisar valores..." data-manut-search="${key}"><div class="manut-filter-list" data-manut-list="${key}"></div></div></th>`).join('')+'</tr>';
+      manutThead.addEventListener('click',e=>{
+        const open=e.target.closest('[data-manut-open]');
+        if(open){e.stopPropagation();const key=open.dataset.manutOpen;const pop=manutThead.querySelector(`[data-manut-pop="${key}"]`);manutThead.querySelectorAll('.manut-filter-pop').forEach(p=>{if(p!==pop)p.hidden=true;});pop.hidden=!pop.hidden;if(!pop.hidden){const search=pop.querySelector('[data-manut-search]');pop.querySelector('[data-manut-list]').innerHTML=manutBuildFilterList(key,search.value);}return;}
+        const sort=e.target.closest('[data-manut-sort]');
+        if(sort){const key=sort.dataset.manutSort;manutSort=manutSort.key===key?{key,dir:manutSort.dir===1?-1:manutSort.dir===-1?0:1}:{key,dir:1};renderManut();return;}
+        if(e.target.id==='manutSelectAll'){manutFiltered.forEach(r=>e.target.checked?manutSelected.add(r.__id):manutSelected.delete(r.__id));renderManut();}
+      });
+      manutThead.addEventListener('input',e=>{const search=e.target.closest('[data-manut-search]');if(search){const key=search.dataset.manutSearch;manutThead.querySelector(`[data-manut-list="${key}"]`).innerHTML=manutBuildFilterList(key,search.value);}});
+      manutThead.addEventListener('change',e=>{
+        const all=e.target.closest('[data-manut-all]');
+        const item=e.target.closest('[data-manut-value]');
+        if(!all&&!item)return;
+        const key=all?all.dataset.manutAll:item.dataset.manutCol;
+        const list=manutThead.querySelector(`[data-manut-list="${key}"]`);
+        const search=manutThead.querySelector(`[data-manut-search="${key}"]`).value;
+        let selected=manutFilters[key] ? new Set(manutFilters[key]) : new Set(manutRows.map(r=>String(r[key]??'')));
+        if(all){manutAvailableValues(key).filter(v=>!normManut(search)||normManut(v).includes(normManut(search))).forEach(v=>e.target.checked?selected.add(v):selected.delete(v));}
+        else {const vals=manutAvailableValues(key).filter(v=>!normManut(search)||normManut(v).includes(normManut(search)));const v=vals[Number(item.dataset.manutValue)];if(v!==undefined)e.target.checked?selected.add(v):selected.delete(v);}
+        const total=new Set(manutRows.map(r=>String(r[key]??''))).size;
+        manutFilters[key]=selected.size>=total?null:selected;
+        if(!manutFilters[key])delete manutFilters[key];
+        renderManut();
+        const pop=manutThead.querySelector(`[data-manut-pop="${key}"]`);if(pop){pop.hidden=false;pop.querySelector('[data-manut-list]').innerHTML=manutBuildFilterList(key,search);}
+      });
+      document.addEventListener('click',e=>{if(!e.target.closest('#manutThead'))manutThead.querySelectorAll('.manut-filter-pop').forEach(p=>p.hidden=true);});
+    }
+    function renderManut(){
+      manutFiltered=manutRows.filter(r=>manutMatches(r));
+      if(manutSort.dir){const k=manutSort.key,d=manutSort.dir;manutFiltered.sort((a,b)=>String(a[k]??'').localeCompare(String(b[k]??''),'pt-BR',{numeric:true,sensitivity:'base'})*d);}
+      manutThead.querySelectorAll('[data-manut-sort]').forEach(el=>{const key=el.dataset.manutSort;el.querySelector('.sort-indicator').textContent=manutSort.key===key?(manutSort.dir===1?'▲':manutSort.dir===-1?'▼':'⇅'):'⇅';});
+      manutThead.querySelectorAll('[data-manut-open]').forEach(btn=>{const key=btn.dataset.manutOpen;btn.classList.toggle('active',!!manutFilters[key]);btn.closest('th').classList.toggle('manut-filter-active',!!manutFilters[key]);});
+      const all=document.getElementById('manutSelectAll');if(all){all.checked=manutFiltered.length>0&&manutFiltered.every(r=>manutSelected.has(r.__id));all.indeterminate=manutFiltered.some(r=>manutSelected.has(r.__id))&&!all.checked;}
+      if(!manutFiltered.length){manutTbody.innerHTML=`<tr><td colspan="18" class="empty-state">${manutRows.length?'Nenhum registro corresponde aos filtros.':'Nenhum registro encontrado na tabela manut_programa.'}</td></tr>`;}
+      else manutTbody.innerHTML=manutFiltered.map(r=>`<tr data-manut-id="${r.__id}" class="${manutSelected.has(r.__id)?'manut-selected':''}"><td style="text-align:center"><input type="checkbox" ${manutSelected.has(r.__id)?'checked':''}></td>${MANUT_COLUMNS.map(([key])=>`<td title="${escManut(r[key])}">${escManut(r[key])}</td>`).join('')}</tr>`).join('');
+      manutTbody.querySelectorAll('tr[data-manut-id] input[type=checkbox]').forEach(cb=>cb.addEventListener('change',()=>{const id=Number(cb.closest('tr').dataset.manutId);cb.checked?manutSelected.add(id):manutSelected.delete(id);cb.closest('tr').classList.toggle('manut-selected',cb.checked);document.getElementById('manutSelectedCount').textContent=`${manutSelected.size} selecionados`;}));
+      document.getElementById('manutCount').textContent=`${manutRows.length} registros`;document.getElementById('manutVisibleCount').textContent=manutFiltered.length;document.getElementById('manutSelectedCount').textContent=`${manutSelected.size} selecionados`;
+    }
+    async function loadManutFromSupabase(showFeedback=true){
+      if(!supabaseClient){manutStatus.textContent='Cliente Supabase indisponível';return;}
+      manutStatus.textContent=`Consultando ${MANUT_TABLE}...`;
+      try{
+        const rows=[]; const PAGE=1000;
+        for(let from=0;;from+=PAGE){const {data,error}=await supabaseClient.from(MANUT_TABLE).select('*').range(from,from+PAGE-1);if(error)throw error;rows.push(...(data||[]));if(!data||data.length<PAGE)break;}
+        manutRows=rows.map((r,i)=>({...r,__id:i+1})); manutSelected.clear();
+        manutStatus.textContent=`Supabase (${MANUT_TABLE}) • ${manutRows.length} registro(s)`; renderManut();
+        if (typeof progOnManutLoaded === 'function') progOnManutLoaded();
+        if(showFeedback)showToast(`${manutRows.length} registros carregados de ${MANUT_TABLE}`);
+      }catch(err){console.error('Erro ao carregar Programas Manutenção:',err);manutStatus.textContent=`Erro ao consultar ${MANUT_TABLE}: ${err.message||err}`;if(showFeedback)showToast('Não foi possível carregar a tabela manut_programa. Confira o nome e as permissões no Supabase.');}
+    }
+    document.getElementById('manutRefreshBtn').addEventListener('click',()=>loadManutFromSupabase(true));
+    document.getElementById('manutClearFiltersBtn').addEventListener('click',()=>{manutFilters={};manutSort={key:'',dir:0};renderManut();showToast('Filtros de Programas Manutenção limpos');});
+    buildManutHeader(); renderManut();
+
+
+    // ===== ABA GERADOR MANUTENÇÃO 2027 (tabela backup_cartao_manut no Supabase) =====
+    const GER_TABLE = 'backup_cartao_manut';
+    const GER_FONTE = 'GERADOR MANUTENÇÃO 2027';
+    const GER_FONTE_FAED = 'GERADOR FAED 2027';
+    const GER_FONTE_PNAE = 'GERADOR PNAE 2027';
+    const GER_FONTES = [GER_FONTE, GER_FONTE_FAED, GER_FONTE_PNAE];
+
+    // Segundo projeto Supabase (automação CDF - FAED / PNAE)
+    const SUPABASE2_URL = "https://sdspabeqnvqkejlrkrcm.supabase.co";
+    const SUPABASE2_KEY = "sb_publishable_tw02D8g0mzHl9578IU4B9w_w82G9c3b";
+    const supabaseCdf = (window.supabase && typeof window.supabase.createClient === 'function')
+      ? window.supabase.createClient(SUPABASE2_URL, SUPABASE2_KEY)
+      : null;
+    // Fontes do Gerador: projeto 1 (manutenção, custeio + capital) e projeto 2 (FAED e PNAE, só custeio; capital = 0,00)
+    const GER_SOURCES = [
+      { table: 'backup_cartao_manut', fonte: GER_FONTE,      client: () => supabaseClient, onlyCusteio: false },
+      { table: 'backup_cartao_faed',  alt: ['backup_cartao_fead'],  fonte: GER_FONTE_FAED, client: () => supabaseCdf, onlyCusteio: true },
+      { table: 'backup_cartao_pnae',  alt: ['backup_cartao_penae'], fonte: GER_FONTE_PNAE, client: () => supabaseCdf, onlyCusteio: true }
+    ];
+    // key = chave interna | candidates = nomes possíveis da coluna no Supabase (ajuste aqui se o nome real for outro)
+    const GER_COLUMNS = [
+      { key:'nte',      label:'NTE',              candidates:['nte'] },
+      { key:'municipio',label:'MUNICÍPIO',        candidates:['municipio','município'] },
+      { key:'cod_sec',  label:'COD_SEC',          candidates:['cod_sec','codigo_sec','cod_sec_'] },
+      { key:'cod_inep', label:'COD_INEP',         candidates:['cod_inep','codigo_inep','inep'] },
+      { key:'unidade',  label:'UNIDADE ESCOLAR',  candidates:['nome_da_unidade_escolar','nome_unidade_escolar','und_escolar','unidade_escolar','unid_escolar','unidade','escola'] },
+      { key:'custeio',  label:'VALOR CUSTEIO',    candidates:['valor_custeio','custeio'], numeric:true },
+      { key:'capital',  label:'VALOR CAPITAL',    candidates:['valor_capital','capital'], numeric:true },
+      { key:'total',    label:'CUSTEIO + CAPITAL', candidates:[], numeric:true },
+      { key:'fonte',    label:'FONTE',            candidates:[] },
+      { key:'remessa',  label:'REMESSA',          candidates:['remessa'] }
+    ];
+    let gerRows = [], gerFiltered = [], gerFilters = {}, gerSort = {key:'',dir:0};
+    const gerSelected = new Set();
+    const gerStatus = document.getElementById('gerStatus');
+    const gerThead = document.getElementById('gerThead');
+    const gerTbody = document.getElementById('gerTbody');
+    const normGer = v => String(v ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+    const escGer = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const fmtBRL = n => Number(n).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+
+    function gerParseNumber(v){
+      if (v === null || v === undefined || v === '') return null;
+      if (typeof v === 'number') return v;
+      let t = String(v).replace(/[^\d,.\-]/g,'');
+      if (t.includes(',')) t = t.replace(/\./g,'').replace(',','.');
+      const n = parseFloat(t);
+      return isNaN(n) ? null : n;
+    }
+    function gerPick(dbRow, candidates){
+      const map = {};
+      Object.keys(dbRow).forEach(k => { map[normGer(k).replace(/\s+/g,'_')] = k; });
+      for (const c of candidates){
+        const k = map[normGer(c).replace(/\s+/g,'_')];
+        if (k !== undefined) return dbRow[k];
+      }
+      return '';
+    }
+    // Fallback: procura uma coluna cujo nome contenha uma das palavras (usado nas tabelas FAED/PNAE)
+    function gerPickLike(dbRow, words){
+      const k = Object.keys(dbRow).find(k => words.some(w => normGer(k).includes(w)));
+      return k === undefined ? '' : dbRow[k];
+    }
+    const GER_CUSTEIO_EXTRA = ['valor_custeio','custeio','valor','valor_repasse','valor_total','valor_pago','repasse'];
+    function gerMapRow(dbRow, i, srcCfg){
+      srcCfg = srcCfg || GER_SOURCES[0];
+      const r = { __id: i + 1 };
+      GER_COLUMNS.forEach(c => {
+        if (c.key === 'fonte') { r.fonte = srcCfg.fonte; return; }
+        if (c.key === 'total') { r.total = 0; return; }
+        if (srcCfg.onlyCusteio && c.key === 'capital') { r.capital = 0; return; } // FAED/PNAE nunca têm capital
+        let raw;
+        if (srcCfg.onlyCusteio && c.key === 'custeio') {
+          raw = gerPick(dbRow, GER_CUSTEIO_EXTRA);
+          if (raw === '' || raw === null) raw = gerPickLike(dbRow, ['custeio','valor']);
+        } else {
+          raw = gerPick(dbRow, c.candidates);
+          if ((raw === '' || raw === null) && srcCfg.onlyCusteio && c.key === 'unidade') raw = gerPickLike(dbRow, ['unidade','escola']);
+        }
+        r[c.key] = c.numeric ? gerParseNumber(raw) : String(raw ?? '').trim();
+      });
+      r.total = (r.custeio || 0) + (r.capital || 0); // cada linha tem custeio OU capital; a soma traz o valor existente
+      return r;
+    }
+    const gerTotalOf = r => (r.custeio || 0) + (r.capital || 0);
+    function gerCell(r, c){
+      if (c.numeric) return r[c.key] === null ? '' : fmtBRL(r[c.key]);
+      return r[c.key] ?? '';
+    }
+    function gerRaw(r, key){ return String(r[key] ?? ''); }
+    function gerMatches(row, exceptKey=''){
+      return GER_COLUMNS.every(c => c.key === exceptKey || !gerFilters[c.key] || gerFilters[c.key].has(gerRaw(row, c.key)));
+    }
+    function gerAvailableValues(key){
+      const seen = new Set();
+      gerRows.forEach(r => { if (gerMatches(r, key)) seen.add(gerRaw(r, key)); });
+      return [...seen].sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true,sensitivity:'base'}));
+    }
+    function gerBuildFilterList(key, search=''){
+      const values = gerAvailableValues(key), selected = gerFilters[key], q = normGer(search);
+      const shown = values.filter(v => !q || normGer(v).includes(q));
+      const allChecked = shown.length > 0 && shown.every(v => !selected || selected.has(v));
+      return `<label class="manut-filter-item"><input type="checkbox" data-ger-all="${key}" ${allChecked?'checked':''}> <b>(Marcar / Desmarcar Todos)</b></label>` +
+        shown.map((v,i)=>`<label class="manut-filter-item"><input type="checkbox" data-ger-value="${i}" data-ger-col="${key}" ${!selected || selected.has(v)?'checked':''}> <span>${v===''?'(Vazio)':escGer(v)}</span></label>`).join('') +
+        (shown.length===0 ? '<div class="file-name">Nenhum valor encontrado.</div>' : '');
+    }
+    function gerClosePop(key){
+      const pop = gerThead.querySelector(`[data-ger-pop="${key}"]`);
+      if (pop) pop.hidden = true;
+    }
+    // Aplicar: com texto digitado, filtra a coluna pelos valores que contêm o texto; sem texto, só fecha (as caixas já filtram ao marcar)
+    function gerApplyFilter(key){
+      const searchEl = gerThead.querySelector(`[data-ger-search="${key}"]`);
+      const q = normGer(searchEl.value);
+      if (q){
+        const vals = gerAvailableValues(key).filter(v => normGer(v).includes(q));
+        if (!vals.length){ showToast('Nenhum valor encontrado para esse texto'); return; }
+        const total = new Set(gerRows.map(r => gerRaw(r, key))).size;
+        if (vals.length >= total) delete gerFilters[key]; else gerFilters[key] = new Set(vals);
+        searchEl.value = '';
+      }
+      gerClosePop(key);
+      renderGer();
+    }
+    function gerClearFilter(key){
+      delete gerFilters[key];
+      const searchEl = gerThead.querySelector(`[data-ger-search="${key}"]`);
+      if (searchEl) searchEl.value = '';
+      gerClosePop(key);
+      renderGer();
+    }
+    function buildGerHeader(){
+      gerThead.innerHTML = '<tr><th class="ger-check-th" style="min-width:42px;text-align:center"><input type="checkbox" id="gerSelectAll" title="Selecionar todos"></th>' + GER_COLUMNS.map(c =>
+        `<th data-ger-colhead="${c.key}" style="position:sticky"><div class="manut-th-inner"><span class="manut-th-label" data-ger-sort="${c.key}">${c.label} <span class="sort-indicator">⇅</span></span><button type="button" class="manut-funnel" data-ger-open="${c.key}" title="Filtrar: ${c.label}">▼</button></div><div class="manut-filter-pop" data-ger-pop="${c.key}" hidden><input class="manut-filter-search" type="search" placeholder="Pesquisar valores..." data-ger-search="${c.key}"><div class="manut-filter-list" data-ger-list="${c.key}"></div><div class="manut-filter-actions"><button type="button" class="btn" data-ger-clear="${c.key}">Limpar</button><button type="button" class="btn btn-primary" data-ger-apply="${c.key}">Aplicar</button></div></div></th>`
+      ).join('') + '</tr>';
+
+      gerThead.addEventListener('click', e => {
+        if (e.target.id === 'gerSelectAll') {
+          gerFiltered.forEach(r => e.target.checked ? gerSelected.add(r.__id) : gerSelected.delete(r.__id));
+          renderGer();
+          return;
+        }
+        const applyBtn = e.target.closest('[data-ger-apply]');
+        if (applyBtn) { e.stopPropagation(); gerApplyFilter(applyBtn.dataset.gerApply); return; }
+        const clearBtn = e.target.closest('[data-ger-clear]');
+        if (clearBtn) { e.stopPropagation(); gerClearFilter(clearBtn.dataset.gerClear); return; }
+        const open = e.target.closest('[data-ger-open]');
+        if (open){
+          e.stopPropagation();
+          const key = open.dataset.gerOpen;
+          const pop = gerThead.querySelector(`[data-ger-pop="${key}"]`);
+          gerThead.querySelectorAll('.manut-filter-pop').forEach(p => { if (p !== pop) p.hidden = true; });
+          pop.hidden = !pop.hidden;
+          if (!pop.hidden) pop.querySelector('[data-ger-list]').innerHTML = gerBuildFilterList(key, pop.querySelector('[data-ger-search]').value);
+          return;
+        }
+        if (e.target.closest('.manut-filter-pop')) return;
+        const sort = e.target.closest('[data-ger-sort]');
+        if (sort){
+          const key = sort.dataset.gerSort;
+          gerSort = gerSort.key === key ? {key, dir: gerSort.dir===1 ? -1 : gerSort.dir===-1 ? 0 : 1} : {key, dir:1};
+          renderGer();
+        }
+      });
+      gerThead.addEventListener('keydown', e => {
+        const search = e.target.closest('[data-ger-search]');
+        if (!search) return;
+        if (e.key === 'Enter') { e.preventDefault(); gerApplyFilter(search.dataset.gerSearch); }
+        else if (e.key === 'Escape') gerClosePop(search.dataset.gerSearch);
+      });
+      gerThead.addEventListener('input', e => {
+        const search = e.target.closest('[data-ger-search]');
+        if (search){
+          const key = search.dataset.gerSearch;
+          gerThead.querySelector(`[data-ger-list="${key}"]`).innerHTML = gerBuildFilterList(key, search.value);
+        }
+      });
+      gerThead.addEventListener('change', e => {
+        const all = e.target.closest('[data-ger-all]');
+        const item = e.target.closest('[data-ger-value]');
+        if (!all && !item) return;
+        const key = all ? all.dataset.gerAll : item.dataset.gerCol;
+        const search = gerThead.querySelector(`[data-ger-search="${key}"]`).value;
+        const selected = gerFilters[key] ? new Set(gerFilters[key]) : new Set(gerRows.map(r => gerRaw(r, key)));
+        const vals = gerAvailableValues(key).filter(v => !search || normGer(v).includes(normGer(search)));
+        if (all) vals.forEach(v => e.target.checked ? selected.add(v) : selected.delete(v));
+        else { const v = vals[Number(item.dataset.gerValue)]; if (v !== undefined) e.target.checked ? selected.add(v) : selected.delete(v); }
+        const total = new Set(gerRows.map(r => gerRaw(r, key))).size;
+        if (selected.size >= total) delete gerFilters[key]; else gerFilters[key] = selected;
+        renderGer();
+        const pop = gerThead.querySelector(`[data-ger-pop="${key}"]`);
+        if (pop){ pop.hidden = false; pop.querySelector('[data-ger-list]').innerHTML = gerBuildFilterList(key, search); }
+      });
+      document.addEventListener('click', e => {
+        if (!e.target.closest('#gerThead')) gerThead.querySelectorAll('.manut-filter-pop').forEach(p => p.hidden = true);
+      });
+    }
+
+    // --- Comparação com a Base: chave = COD_SEC | COD_INEP (ou município|unidade se não houver código) ---
+    const gerKeyOf = (cod, inep, mun, uni) => {
+      const id = (cod || inep) ? `${normGer(cod)}|${normGer(inep)}` : `${normGer(mun)}|${normGer(uni)}`;
+      return id;
+    };
+    function gerComputeDiff(){
+      const baseMap = new Map();
+      (typeof rawData !== 'undefined' ? rawData : []).filter(r => GER_FONTES.includes(r['FONTE']))
+        .forEach(r => baseMap.set(r['FONTE'] + '#' + gerKeyOf(r['CODIGO'], r['INEP'], r['MUNICIPIO'], r['UNIDADE ESCOLAR']), r._numericValor));
+      const seen = new Set(); let nNovo=0, nAlt=0, nIgual=0;
+      gerRows.forEach(r => {
+        const k = r.fonte + '#' + gerKeyOf(r.cod_sec, r.cod_inep, r.municipio, r.unidade);
+        seen.add(k);
+        if (!baseMap.has(k)) { r.situacao = 'Novo'; nNovo++; }
+        else if (Math.abs((baseMap.get(k) || 0) - gerTotalOf(r)) > 0.004) { r.situacao = `Alterado (Base: ${fmtBRL(baseMap.get(k) || 0)})`; nAlt++; }
+        else { r.situacao = 'Igual'; nIgual++; }
+      });
+      let nRem = 0; baseMap.forEach((v,k) => { if (!seen.has(k)) nRem++; });
+      const el = document.getElementById('gerDiffSummary');
+      if (el) el.textContent = baseMap.size === 0 && gerRows.length
+        ? `Base ainda sem dados desta fonte • ${nNovo} novo(s) a enviar`
+        : `${nNovo} novo(s) • ${nAlt} alterado(s) • ${nIgual} igual(is) • ${nRem} só na Base`;
+    }
+
+    function gerToBase(){
+      if (!gerRows.length){ showToast('Carregue os dados do gerador primeiro'); return; }
+      if (typeof rawData === 'undefined') return;
+      const aEnviar = gerRows;
+      const antes = rawData.filter(r => GER_FONTES.includes(r['FONTE'])).length;
+      const listaFontes = GER_FONTES.join(' / ');
+      const msg = antes
+        ? `A Base já tem ${antes} linha(s) das fontes "${listaFontes}".\nElas serão SUBSTITUÍDAS pelas ${aEnviar.length} linha(s) do gerador. As demais fontes não são tocadas. Continuar?`
+        : `Enviar ${aEnviar.length} linha(s) do gerador para a Base / Filtros com FONTE = "${listaFontes}"?`;
+      if (!window.confirm(msg)) return;
+      rawData = rawData.filter(r => !GER_FONTES.includes(r['FONTE']));
+      aEnviar.forEach(r => rawData.push(buildRecord(0, {
+        nte: r.nte, municipio: r.municipio, codigo: r.cod_sec, inep: r.cod_inep,
+        escola: r.unidade, valorRaw: gerTotalOf(r), fonte: r.fonte
+      })));
+      rawData.forEach((r, i) => { r._id = i + 1; });
+      fileNameDisplay.textContent = `Base • ${rawData.length} registo(s) (inclui ${aEnviar.length} do Gerador 2027)`;
+      resetAllState();
+      gerComputeDiff(); renderGer();
+      showToast(`${aEnviar.length} linha(s) do Gerador 2027 enviadas para a Base / Filtros`);
+      switchTab('baseTab');
+    }
+
+    function renderGer(){
+      gerFiltered = gerRows.filter(r => gerMatches(r));
+      if (gerSort.dir){
+        const k = gerSort.key, d = gerSort.dir, col = GER_COLUMNS.find(c => c.key === k);
+        gerFiltered.sort((a,b) => col && col.numeric
+          ? ((a[k] ?? -Infinity) - (b[k] ?? -Infinity)) * d
+          : gerRaw(a,k).localeCompare(gerRaw(b,k),'pt-BR',{numeric:true,sensitivity:'base'}) * d);
+      }
+      gerThead.querySelectorAll('[data-ger-sort]').forEach(el => {
+        const key = el.dataset.gerSort;
+        el.querySelector('.sort-indicator').textContent = gerSort.key === key ? (gerSort.dir===1?'▲':gerSort.dir===-1?'▼':'⇅') : '⇅';
+      });
+      gerThead.querySelectorAll('[data-ger-open]').forEach(btn => {
+        const key = btn.dataset.gerOpen;
+        btn.classList.toggle('active', !!gerFilters[key]);
+        btn.closest('th').classList.toggle('manut-filter-active', !!gerFilters[key]);
+      });
+      if (!gerFiltered.length){
+        gerTbody.innerHTML = `<tr><td colspan="${GER_COLUMNS.length + 1}" class="empty-state">${gerRows.length ? 'Nenhum registro corresponde aos filtros.' : 'Nenhum registro encontrado nas tabelas do Gerador.'}</td></tr>`;
+      } else {
+        gerTbody.innerHTML = gerFiltered.map(r => `<tr data-ger-id="${r.__id}" class="${gerSelected.has(r.__id)?'ger-selected':''}"><td class="ger-check-td" style="text-align:center"><input type="checkbox" ${gerSelected.has(r.__id)?'checked':''}></td>` + GER_COLUMNS.map(c => {
+          const t = escGer(gerCell(r, c));
+          return `<td class="${c.numeric?'ger-num':''}" title="${t}">${t}</td>`;
+        }).join('') + '</tr>').join('');
+      }
+      const gAll = document.getElementById('gerSelectAll');
+      if (gAll) { gAll.checked = gerFiltered.length > 0 && gerFiltered.every(r => gerSelected.has(r.__id)); gAll.indeterminate = !gAll.checked && gerFiltered.some(r => gerSelected.has(r.__id)); }
+      document.getElementById('gerSelectedCount').textContent = `${gerSelected.size} selecionados`;
+      const totCust = gerFiltered.reduce((a, r) => a + (r.custeio || 0), 0);
+      const totCap = gerFiltered.reduce((a, r) => a + (r.capital || 0), 0);
+      const totGeral = totCust + totCap;
+      document.getElementById('gerCount').textContent = `${gerRows.length} registros`;
+      document.getElementById('gerVisibleCount').textContent = gerFiltered.length;
+      document.getElementById('gerTotalValor').textContent = `Custeio ${fmtBRL(totCust)} • Capital ${fmtBRL(totCap)} • Total ${fmtBRL(totGeral)}`;
+    }
+    async function gerFetchAll(client, table){
+      const rows = []; const PAGE = 1000;
+      for (let from = 0;; from += PAGE){
+        const { data, error } = await client.from(table).select('*').range(from, from + PAGE - 1);
+        if (error) throw error;
+        rows.push(...(data || []));
+        if (!data || data.length < PAGE) break;
+      }
+      return rows;
+    }
+    const gerIsMissingTable = err => /PGRST205|42P01|could not find the table|does not exist/i.test(`${err && err.code} ${err && err.message}`);
+    function gerRenderSourceInfo(results){
+      const box = document.getElementById('gerSourceInfo');
+      if (!box) return;
+      box.innerHTML = results.map(x => {
+        let color = 'var(--text-secondary)', txt;
+        if (x.error){ color = '#dc2626'; txt = `❌ erro na tabela ${escGer(x.table)}: ${escGer(x.error)}`; }
+        else if (x.count === 0){ color = '#d97706'; txt = `⚠️ tabela ${escGer(x.table)} retornou 0 linhas. Se ela tem dados, falta uma policy de leitura (RLS / SELECT para anon) no Supabase.`; }
+        else txt = `✅ tabela ${escGer(x.table)}: ${x.count} linha(s)`;
+        return `<div style="color:${color}"><strong>${escGer(x.fonte)}</strong> — ${txt}</div>`;
+      }).join('');
+    }
+    async function loadGeradorFromSupabase(showFeedback=true){
+      gerStatus.textContent = 'Consultando as 3 tabelas do Gerador...';
+      const all = [], results = [], warnings = [];
+      for (const s of GER_SOURCES){
+        const info = { table: s.table, fonte: s.fonte, count: 0, error: '' };
+        const client = s.client();
+        if (!client){ info.error = 'cliente Supabase indisponível'; results.push(info); continue; }
+        const names = [s.table, ...(s.alt || [])];
+        for (let n = 0; n < names.length; n++){
+          try {
+            const rows = await gerFetchAll(client, names[n]);
+            info.table = names[n]; info.count = rows.length; info.error = '';
+            rows.forEach(dbRow => all.push({ dbRow, cfg: s }));   // cada linha leva a fonte da PRÓPRIA tabela
+            if (rows.length){
+              const keys = Object.keys(rows[0]).map(k => normGer(k).replace(/\s+/g,'_'));
+              const miss = GER_COLUMNS.filter(c => c.candidates.length && !(s.onlyCusteio && (c.key === 'capital' || c.key === 'custeio'))
+                && !c.candidates.some(x => keys.includes(normGer(x).replace(/\s+/g,'_')))).map(c => c.label);
+              if (miss.length){ warnings.push(`${names[n]} sem: ${miss.join(', ')}`); console.warn('Colunas disponíveis em ' + names[n] + ':', Object.keys(rows[0])); }
+            }
+            break;
+          } catch (err) {
+            console.error('Erro ao carregar ' + names[n] + ':', err);
+            info.table = names[n];
+            info.error = (err.message || String(err)) + (err.hint ? ` (${err.hint})` : '');
+            if (!gerIsMissingTable(err)) break;   // só tenta o nome alternativo se a tabela não existir
+          }
+        }
+        results.push(info);
+      }
+      gerRenderSourceInfo(results);
+      gerRows = all.map((x, i) => gerMapRow(x.dbRow, i, x.cfg));
+      gerSelected.clear();
+      gerComputeDiff();
+      const porFonte = results.map(x => `${x.fonte.replace(' 2027','')}: ${x.count}`).join(' • ');
+      const erros = results.filter(x => x.error);
+      gerStatus.textContent = `${gerRows.length} registro(s) • ${porFonte}` + (warnings.length ? ` • atenção: ${warnings.join('; ')}` : '') + (erros.length ? ' • VEJA OS ERROS ABAIXO' : '');
+      renderGer();
+      if (erros.length) showToast(`Erro ao carregar: ${erros.map(x => x.table).join(', ')}`);
+      else if (showFeedback) showToast(`${gerRows.length} registros carregados (${porFonte})`);
+    }
+    document.getElementById('gerRefreshBtn').addEventListener('click', () => loadGeradorFromSupabase(true));
+    document.getElementById('gerClearFiltersBtn').addEventListener('click', () => { gerFilters = {}; gerSort = {key:'',dir:0}; renderGer(); showToast('Filtros do Gerador Manutenção 2027 limpos'); });
+    document.getElementById('gerToBaseBtn').addEventListener('click', gerToBase);
+    ['sidebarGeradorBtn','manutSidebarGeradorBtn','gerSidebarSelfBtn'].forEach(id => document.getElementById(id).addEventListener('click', () => switchTab('geradorManut2027Tab')));
+    document.getElementById('gerSidebarBaseBtn').addEventListener('click', () => switchTab('baseTab'));
+    document.getElementById('gerSidebarProgramBtn').addEventListener('click', () => switchTab('programasManutTab'));
+    gerTbody.addEventListener('change', e => {
+      const cb = e.target; const tr = cb.closest('tr');
+      if (cb.type !== 'checkbox' || !tr || !tr.dataset.gerId) return;
+      const id = Number(tr.dataset.gerId);
+      cb.checked ? gerSelected.add(id) : gerSelected.delete(id);
+      tr.classList.toggle('ger-selected', cb.checked);
+      renderGer();
+    });
+    buildGerHeader(); renderGer();
+
+
+    function syncThemeButtonLabel() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      themeToggleBtn.textContent = isDark ? '☀️ Tema Claro' : '🌙 Tema Azul / Preto';
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      if (isDark) {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+      syncThemeButtonLabel();
+      showToast(document.documentElement.getAttribute('data-theme') === 'dark' ? 'Tema Azul e Preto ativado' : 'Tema Claro ativado');
+    });
+
+    toggleSidebarBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('collapsed');
+    });
+
+    expandableHeader.addEventListener('click', () => {
+      const isOpen = expandableFilterBox.classList.toggle('open');
+      expandableStatus.textContent = isOpen ? 'Recolher' : 'Expandir';
+    });
+
+    document.getElementById('regenerateMatrixBtn').addEventListener('click', () => {
+      buildGeneratedMatrix(true);
+      showToast('Matriz regerada e acumulada no Resumo');
+    });
+
+    function parseCurrencyValue(val) {
+      if (typeof val === 'number') return val;
+      if (!val) return 0;
+      const cleaned = String(val)
+        .replace(/[R$\s]/g, '')
+        .replace(/\./g, '')
+        .replace(',', '.');
+      const num = parseFloat(cleaned);
+      return isNaN(num) ? 0 : num;
+    }
+
+    function formatBRL(num) {
+      return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function formatNumberOnly(num) {
+      return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function normalizeText(val) {
+      return val === null || val === undefined ? '' : String(val).trim();
+    }
+
+    function stripAccents(str) {
+      return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+    }
+
+    function buildRecord(index, fields) {
+      const numericValor = parseCurrencyValue(fields.valorRaw);
+      return {
+        _id: index,
+        'NTE': normalizeText(fields.nte),
+        'MUNICIPIO': normalizeText(fields.municipio),
+        'CODIGO': normalizeText(fields.codigo),
+        'INEP': normalizeText(fields.inep),
+        'UNIDADE ESCOLAR': normalizeText(fields.escola),
+        'VALOR': formatBRL(numericValor),
+        '_numericValor': numericValor,
+        'FONTE': normalizeText(fields.fonte)
+      };
+    }
+
+    function extractRowFields(row, headersNorm) {
+      const findIdx = (names) => headersNorm.findIndex(h => names.includes(h));
+      const idxNte = findIdx(['NTE']);
+      const idxMun = findIdx(['MUNICIPIO', 'MUNICÍPIO']);
+      const idxSec = findIdx(['CODIGO', 'CÓDIGO', 'CODIGO SEC', 'CÓDIGO SEC', 'COD SEC']);
+      const idxInep = findIdx(['INEP', 'CODIGO INEP', 'CÓDIGO INEP', 'COD INEP']);
+      const idxEsc = findIdx(['UNIDADE ESCOLAR', 'ESCOLA']);
+      const idxVal = findIdx(['VALOR', 'VL']);
+      const idxFon = findIdx(['FONTE']);
+
+      const hasNamedCols = [idxNte, idxMun, idxSec, idxEsc, idxVal, idxFon].some(i => i >= 0);
+
+      if (hasNamedCols) {
+        return {
+          nte: idxNte >= 0 ? row[idxNte] : '',
+          municipio: idxMun >= 0 ? row[idxMun] : '',
+          codigo: idxSec >= 0 ? row[idxSec] : '',
+          inep: idxInep >= 0 ? row[idxInep] : '',
+          escola: idxEsc >= 0 ? row[idxEsc] : '',
+          valorRaw: idxVal >= 0 ? row[idxVal] : 0,
+          fonte: idxFon >= 0 ? row[idxFon] : ''
+        };
+      }
+
+      if (row.length >= 7) {
+        return {
+          nte: row[0],
+          municipio: row[1],
+          codigo: row[2],
+          inep: row[3],
+          escola: row[4],
+          valorRaw: row[5],
+          fonte: row[6]
+        };
+      }
+
+      return {
+        nte: row[0],
+        municipio: row[1],
+        codigo: row[2],
+        inep: row[6] ?? '',
+        escola: row[3],
+        valorRaw: row[4],
+        fonte: row[5]
+      };
+    }
+
+    function mapSupabaseRowToRecord(dbRow, index) {
+      return buildRecord(index, {
+        nte: dbRow.nte ?? dbRow.NTE ?? '',
+        municipio: dbRow.municipio ?? dbRow.MUNICIPIO ?? '',
+        codigo: dbRow.codigo ?? dbRow.codigo_sec ?? dbRow.CODIGO ?? '',
+        inep: dbRow.inep ?? dbRow.codigo_inep ?? dbRow.INEP ?? '',
+        escola: dbRow.unidade_escolar ?? dbRow.escola ?? dbRow['UNIDADE ESCOLAR'] ?? '',
+        valorRaw: dbRow.valor ?? dbRow.VALOR ?? 0,
+        fonte: dbRow.fonte ?? dbRow.FONTE ?? ''
+      });
+    }
+
+    async function loadFromSupabase(showFeedback = true) {
+      if (!supabaseClient) {
+        fileNameDisplay.textContent = 'Supabase indisponível (modo local)';
+        if (showFeedback) showToast('Cliente Supabase não carregado');
+        return;
+      }
+
+      fileNameDisplay.textContent = `A carregar de ${SUPABASE_TABLE}...`;
+      try {
+        const data = [];
+        const PAGE = 1000;
+        for (let from = 0; ; from += PAGE) {
+          const { data: page, error } = await supabaseClient.from(SUPABASE_TABLE).select('*').range(from, from + PAGE - 1);
+          if (error) throw error;
+          data.push(...page);
+          fileNameDisplay.textContent = `A carregar... ${data.length} registo(s)`;
+          if (page.length < PAGE) break;
+        }
+
+        rawData = (data || []).map((dbRow, idx) => mapSupabaseRowToRecord(dbRow, idx + 1));
+        fileNameDisplay.textContent = `Supabase (${SUPABASE_TABLE}) • ${rawData.length} registo(s)`;
+        resetAllState();
+        if (showFeedback) showToast(`Carregados ${rawData.length} registo(s) do Supabase`);
+      } catch (err) {
+        console.error('Erro ao carregar do Supabase:', err);
+        fileNameDisplay.textContent = `Erro ao ler ${SUPABASE_TABLE}`;
+        if (showFeedback) showToast('Erro ao carregar dados do Supabase');
+      }
+    }
+
+
+    xlsxInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      fileNameDisplay.textContent = file.name;
+      const reader = new FileReader();
+
+      reader.onload = async (evt) => {
+        try { await ensureXLSX(); } catch (_) { showToast('Não foi possível carregar a biblioteca XLSX'); return; }
+        const data = new Uint8Array(evt.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+
+        const headersNorm = (rows[0] || []).map(h => stripAccents(normalizeText(h)));
+        const nextRows = [];
+
+        for (let i = 1; i < rows.length; i++) {
+          const row = rows[i];
+          if (!row || row.slice(0, 7).every(cell => normalizeText(cell) === '')) continue;
+          const fields = extractRowFields(row, headersNorm);
+          nextRows.push(buildRecord(i, fields));
+        }
+
+        rawData = nextRows;
+        resetAllState();
+        showToast(`Planilha "${file.name}" carregada (${rawData.length} linhas)`);
+      };
+
+      reader.readAsArrayBuffer(file);
+    });
+
+    /* ===== Filtros / tabela virtual ===== */
+    const norm = s => String(s ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').toLowerCase().trim();
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const collator = new Intl.Collator('pt-BR', { numeric: true, sensitivity: 'base' });
+    const EMPTY_MSG = 'Nenhum registo carregado. Carregue uma planilha <strong>.xlsx</strong> ou clique em <strong>Atualizar</strong> para buscar no Supabase.';
+    const ROW_H = 34, OVER = 10;
+    const fState = { text: {}, set: {} };
+    COLUMNS.forEach(c => { fState.text[c] = ''; fState.set[c] = null; });
+    const uniq = {}, lists = {}, sideInputs = {};
+    const progSel = new Set();          // programas (colunas de Programas Manutenção) marcados na lista de validação
+    let progListEl = null, progSearchEl = null;
+    let baseOrder = [], preds = [], popCol = null, popSnap = null, popList = null, applyTimer = null;
+    let facetVer = 0, colPredMap = {}, condPredList = [];
+    const facetCache = {};
+    const tableContainer = document.querySelector('.table-container');
+
+    function ensureXLSX() {
+      return window.XLSX ? Promise.resolve() : new Promise((ok, fail) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js';
+        s.onload = ok; s.onerror = () => fail(new Error('xlsx'));
+        document.head.appendChild(s);
+      });
+    }
+
+    function prepareData() {
+      facetVer++;
+      rawData.forEach(r => {
+        if (r._n) return;
+        r._n = {};
+        COLUMNS.forEach(c => { r._n[c] = norm(r[c]); });
+      });
+      COLUMNS.forEach(col => {
+        const m = new Set();
+        rawData.forEach(r => m.add(r[col]));
+        uniq[col] = [...m].sort(collator.compare).map(v => ({ v, n: norm(v) }));
+      });
+    }
+
+    function sortBase() {
+      const { key, dir } = baseSortState;
+      if (!key || dir === 'none') { baseOrder = rawData; return; }
+      const f = dir === 'asc' ? 1 : -1;
+      baseOrder = rawData.slice().sort(key === '_numericValor'
+        ? (a, b) => (a._numericValor - b._numericValor) * f
+        : (a, b) => collator.compare(a[key], b[key]) * f);
+    }
+
+    function compareGeneric(a, b, dir) {
+      const f = dir === 'asc' ? 1 : -1;
+      return (typeof a === 'number' && typeof b === 'number') ? (a - b) * f : collator.compare(String(a ?? ''), String(b ?? '')) * f;
+    }
+
+    /* Busca parcial: ignora maiúsculas/minúsculas e acentos.
+       No NTE, "nte 1" não pega "NTE 10"/"NTE 11" (só "nte 1" seguido de não-dígito). */
+    function textMatch(col, n, q) {
+      let i = n.indexOf(q);
+      if (i < 0) return false;
+      if (col !== 'NTE' || !/\d$/.test(q)) return true;
+      while (i >= 0) {
+        if (!/\d/.test(n.charAt(i + q.length))) return true;
+        i = n.indexOf(q, i + 1);
+      }
+      return false;
+    }
+
+    function compile() {
+      preds = []; colPredMap = {}; condPredList = [];
+      COLUMNS.forEach(col => {
+        const arr = colPredMap[col] = [];
+        const q = norm(fState.text[col]);
+        if (q) {
+          if (col === 'VALOR') {
+            const hasDigit = /\d/.test(q), k = Math.round(parseCurrencyValue(fState.text[col]) * 100);
+            arr.push(r => r._n[col].includes(q) || (hasDigit && Math.round(r._numericValor * 100) === k));
+          } else arr.push(r => textMatch(col, r._n[col], q));
+        }
+        const s = fState.set[col];
+        if (s) arr.push(r => s.has(r[col]));
+        arr.forEach(f => preds.push(f));
+      });
+      if (progSel.size) {
+        const codes = progBuildCodes();
+        const fn = r => codes.has(progKey(r['CODIGO']));
+        preds.push(fn);
+        condPredList.push({ col: '__prog', fn });
+      }
+      const sels = document.querySelectorAll('.condition-select');
+      document.querySelectorAll('.condition-textarea').forEach((ta, i) => {
+        const col = sels[i].value;
+        const raw = ta.value.split(col === 'VALOR' ? /[\r\n;\t]+/ : /[\r\n,;\t]+/).map(s => s.trim()).filter(Boolean);
+        if (!raw.length) return;
+        let fn;
+        if (col === 'VALOR') {
+          const nums = new Set(raw.filter(t => /\d/.test(t)).map(t => Math.round(parseCurrencyValue(t) * 100)));
+          fn = r => nums.has(Math.round(r._numericValor * 100));
+        } else {
+          const set = new Set(raw.map(norm));
+          fn = r => set.has(r._n[col]);
+        }
+        preds.push(fn);
+        condPredList.push({ col, fn });
+      });
+      facetVer++;
+    }
+
+    /* Valores disponíveis de uma coluna = os que existem nas linhas que passam
+       pelos filtros das OUTRAS colunas (filtro em cascata). */
+    function availableValues(col) {
+      const c = facetCache[col];
+      if (c && c.ver === facetVer) return c.vals;
+      const fs = [];
+      COLUMNS.forEach(o => { if (o !== col) (colPredMap[o] || []).forEach(f => fs.push(f)); });
+      condPredList.forEach(x => { if (x.col !== col) fs.push(x.fn); });
+      let vals;
+      if (!fs.length) vals = uniq[col];
+      else {
+        const seen = new Set();
+        for (let i = 0; i < rawData.length; i++) {
+          const r = rawData[i];
+          let ok = true;
+          for (let j = 0; j < fs.length; j++) if (!fs[j](r)) { ok = false; break; }
+          if (ok) seen.add(r[col]);
+        }
+        vals = uniq[col].filter(o => seen.has(o.v));
+      }
+      facetCache[col] = { ver: facetVer, vals };
+      return vals;
+    }
+
+    function colActive(col) {
+      if (fState.text[col].trim() || fState.set[col]) return true;
+      const sels = document.querySelectorAll('.condition-select');
+      return [...document.querySelectorAll('.condition-textarea')].some((ta, i) => sels[i].value === col && ta.value.trim());
+    }
+
+    function refreshBadges() {
+      const pgTitle = sidebarValidationContainer.querySelector('[data-prog-group] .validation-title');
+      if (pgTitle) pgTitle.classList.toggle('has-filter', progSel.size > 0);
+      COLUMNS.forEach(col => {
+        const a = colActive(col);
+        const fb = document.querySelector(`.funnel-btn[data-col="${col}"]`);
+        if (fb) fb.classList.toggle('active-filter', a);
+        const t = sidebarValidationContainer.querySelector(`.validation-group[data-col="${col}"] .validation-title`);
+        if (t) t.classList.toggle('has-filter', a);
+      });
+    }
+
+    function applyFilters(keepScroll) {
+      compile();
+      const out = [];
+      for (let i = 0; i < baseOrder.length; i++) {
+        const r = baseOrder[i];
+        let ok = true;
+        for (let j = 0; j < preds.length; j++) if (!preds[j](r)) { ok = false; break; }
+        if (ok) out.push(r);
+      }
+      filteredData = out;
+      refreshBadges();
+      baseVT.refresh(!keepScroll);
+      updateCards();
+      syncSelectAll();
+      if (popCol) popList.refresh();
+      COLUMNS.forEach(c => lists[c] && lists[c].refresh());
+      if (document.getElementById('generatedTab').classList.contains('active')) buildGeneratedMatrix(true);
+      if (document.getElementById('summaryTab').classList.contains('active') && !isBahiaConsolidatedMode) {
+        buildGeneratedMatrix(true);
+        renderSummary();
+      }
+    }
+
+    function scheduleApply(delay = 0) {
+      clearTimeout(applyTimer);
+      applyTimer = setTimeout(() => requestAnimationFrame(() => applyFilters()), delay);
+    }
+
+    function setText(col, val, from) {
+      fState.text[col] = val;
+      if (from !== 'side' && sideInputs[col] && sideInputs[col].value !== val) sideInputs[col].value = val;
+      if (from !== 'pop' && popCol === col) popoverSearchInput.value = val;
+      scheduleApply(30);
+    }
+
+    class ValueList {
+      constructor(col, el, isVisible) {
+        this.col = col; this.el = el; this.isVisible = isVisible;
+        this.shown = []; this.matched = []; this.q = null;
+        el.addEventListener('change', e => this.onChange(e));
+      }
+      render() {
+        const col = this.col, q = norm(fState.text[col]);
+        this.q = fState.text[col];
+        this.ver = facetVer;
+        const avail = availableValues(col);
+        if (!q) this.matched = avail;
+        else if (col === 'VALOR') {
+          const k = Math.round(parseCurrencyValue(fState.text[col]) * 100), hasDigit = /\d/.test(q);
+          this.matched = avail.filter(o => o.n.includes(q) || (hasDigit && Math.round(parseCurrencyValue(o.v) * 100) === k));
+        } else this.matched = avail.filter(o => textMatch(col, o.n, q));
+        this.shown = this.matched.slice(0, 200);
+        let h = '<label class="validation-item"><input type="checkbox" data-all="1"><b>(Marcar / Desmarcar Todos)</b></label>';
+        this.shown.forEach((o, i) => { h += `<label class="validation-item"><input type="checkbox" data-i="${i}"><span>${o.v === '' ? '(Vazio)' : esc(o.v)}</span></label>`; });
+        if (this.matched.length > 200) h += `<div class="vl-more">+${this.matched.length - 200} valores — digite para refinar</div>`;
+        if (!this.matched.length) h += '<div class="vl-more">Nenhum valor encontrado</div>';
+        this.el.innerHTML = h;
+        this.syncAll();
+      }
+      syncAll() {
+        const s = fState.set[this.col], all = this.el.querySelector('[data-all]');
+        if (!all) return;
+        let n = 0;
+        for (const o of this.matched) if (!s || s.has(o.v)) n++;
+        all.checked = n > 0 && n === this.matched.length;
+        all.indeterminate = n > 0 && n < this.matched.length;
+        this.el.querySelectorAll('[data-i]').forEach(cb => { cb.checked = !s || s.has(this.shown[cb.dataset.i].v); });
+      }
+      refresh() {
+        if (!this.isVisible()) return;
+        (fState.text[this.col] === this.q && this.ver === facetVer) ? this.syncAll() : this.render();
+      }
+      onChange(e) {
+        const col = this.col, t = e.target, total = uniq[col].length;
+        let s = fState.set[col];
+        if (!s && t.checked) return;
+        if (!s) s = new Set(uniq[col].map(o => o.v));
+        const vals = t.dataset.all ? this.matched.map(o => o.v) : [this.shown[t.dataset.i].v];
+        vals.forEach(v => t.checked ? s.add(v) : s.delete(v));
+        fState.set[col] = s.size === total ? null : s;
+        this.syncAll();
+        scheduleApply();
+      }
+    }
+
+
+    // ===== LISTA DE VALIDAÇÃO "PROGRAMAS MANUTENÇÃO" (filtra a Base pelo Código SEC das escolas da aba Programas Manutenção) =====
+    const PROG_LIST = [
+      ['tempo_int', 'TEMPO INTEGRAL'], ['comple_polie', 'COMPLEXO POLIESPORTIVO'], ['educ_espe', 'EDUCAÇÃO ESPECIAL'],
+      ['cpa', 'CPA'], ['cemit', 'CEMIT'], ['ct_cjcc', 'CT CJCC'], ['cpm', 'CPM'], ['uab_polo', 'UAB / POLO'],
+      ['ct_educ_profi', 'CT EDUCAÇÃO PROFISSIONAL'], ['ct_terri_educ_profi', 'CT TERRITÓRIO EDUCAÇÃO PROFISSIONAL']
+    ];
+    // vazio, "-", "–" ou "—" = a escola NÃO tem o programa
+    const progHasValue = v => { const t = String(v ?? '').trim(); return t !== '' && !/^[-–—]+$/.test(t); };
+    const progKey = v => { const t = String(v ?? '').trim().toLowerCase(); return /^\d+$/.test(t) ? t.replace(/^0+(?=\d)/, '') : t; };
+    function progBuildCodes() {
+      const codes = new Set();
+      manutRows.forEach(r => {
+        if (!progSel.size) return;
+        for (const k of progSel) { if (progHasValue(r[k])) { const c = progKey(r.cod_sec); if (c) codes.add(c); break; } }
+      });
+      return codes;
+    }
+    function progCount(key) {
+      const set = new Set();
+      manutRows.forEach(r => { if (progHasValue(r[key])) { const c = progKey(r.cod_sec); if (c) set.add(c); } });
+      return set.size;
+    }
+    function progSetHint(msg) { const h = document.getElementById('progHint'); if (h) h.textContent = msg; }
+    function progRenderList() {
+      if (!progListEl) return;
+      const q = norm(progSearchEl ? progSearchEl.value : '');
+      const shown = PROG_LIST.filter(([, label]) => !q || norm(label).includes(q));
+      const loaded = manutRows.length > 0;
+      const allChecked = shown.length > 0 && shown.every(([k]) => progSel.has(k));
+      const someChecked = shown.some(([k]) => progSel.has(k));
+      let h = `<label class="validation-item"><input type="checkbox" data-prog-all="1"${allChecked ? ' checked' : ''}><b>(Marcar / Desmarcar Todos)</b></label>`;
+      shown.forEach(([k, label]) => {
+        h += `<label class="validation-item"><input type="checkbox" data-prog="${k}"${progSel.has(k) ? ' checked' : ''}><span>${esc(label)}${loaded ? ` <small>(${progCount(k)})</small>` : ''}</span></label>`;
+      });
+      if (!shown.length) h += '<div class="vl-more">Nenhum programa encontrado</div>';
+      progListEl.innerHTML = h;
+      const all = progListEl.querySelector('[data-prog-all]');
+      if (all) all.indeterminate = !allChecked && someChecked;
+      progSetHint(loaded
+        ? 'Traz para a Base as escolas (pelo Código SEC) onde o programa marcado é diferente de "-" na aba Programas Manutenção. Vários programas = escolas de qualquer um deles.'
+        : 'Os dados de Programas Manutenção serão carregados do Supabase ao marcar um programa.');
+    }
+    async function progOnChange() {
+      if (progSel.size && manutRows.length === 0) {
+        progSetHint('Carregando Programas Manutenção do Supabase...');
+        await loadManutFromSupabase(false);
+        if (manutRows.length === 0) showToast('Não foi possível carregar Programas Manutenção; o filtro não terá resultado');
+      }
+      progRenderList();
+      scheduleApply();
+    }
+    // chamada quando a aba Programas Manutenção (re)carrega do Supabase
+    function progOnManutLoaded() {
+      progRenderList();
+      if (progSel.size) scheduleApply();
+    }
+    function progBuildGroup() {
+      const g = document.createElement('div');
+      g.className = 'validation-group open';
+      g.dataset.progGroup = '1';
+      g.innerHTML = `<div class="validation-title"><span>ESCOLHA O PROGRAMA MANUTENÇÃO</span><span class="badge">Filtrado</span></div>
+        <div class="validation-body"><input type="text" class="validation-search" placeholder="Digite para filtrar programas..." autocomplete="off"><div class="validation-list"></div><span class="popover-hint" id="progHint"></span></div>`;
+      progSearchEl = g.querySelector('input');
+      progListEl = g.querySelector('.validation-list');
+      g.querySelector('.validation-title').addEventListener('click', () => g.classList.toggle('open'));
+      progSearchEl.addEventListener('input', progRenderList);
+      progListEl.addEventListener('change', e => {
+        const t = e.target;
+        if (t.dataset.progAll) {
+          const q = norm(progSearchEl.value);
+          PROG_LIST.filter(([, label]) => !q || norm(label).includes(q)).forEach(([k]) => t.checked ? progSel.add(k) : progSel.delete(k));
+        } else if (t.dataset.prog) {
+          t.checked ? progSel.add(t.dataset.prog) : progSel.delete(t.dataset.prog);
+        } else return;
+        progOnChange();
+      });
+      progRenderList();
+      return g;
+    }
+
+    function buildSidebarValidations() {
+      sidebarValidationContainer.innerHTML = '';
+      sidebarValidationContainer.appendChild(progBuildGroup());
+      COLUMNS.forEach(col => {
+        const g = document.createElement('div');
+        g.className = 'validation-group';
+        g.dataset.col = col;
+        g.innerHTML = `<div class="validation-title"><span>${col}</span><span class="badge">Filtrado</span></div>
+          <div class="validation-body"><input type="text" class="validation-search" placeholder="Digite para filtrar ${col}..." autocomplete="off"><div class="validation-list"></div></div>`;
+        const input = sideInputs[col] = g.querySelector('input');
+        const vl = lists[col] = new ValueList(col, g.querySelector('.validation-list'), () => g.classList.contains('open'));
+        g.querySelector('.validation-title').addEventListener('click', () => {
+          g.classList.toggle('open');
+          if (g.classList.contains('open')) vl.render();
+        });
+        input.addEventListener('input', () => setText(col, input.value, 'side'));
+        sidebarValidationContainer.appendChild(g);
+      });
+    }
+
+    const baseVT = {
+      s: -1, e: -1,
+      refresh(reset) {
+        if (reset) tableContainer.scrollTop = 0;
+        this.s = this.e = -1;
+        this.render();
+      },
+      render() {
+        const n = filteredData.length;
+        if (!n) {
+          this.s = this.e = -1;
+          tableBody.innerHTML = `<tr class="spacer"><td colspan="8" class="empty-state">${rawData.length ? 'Nenhum registro encontrado para os filtros aplicados.' : EMPTY_MSG}</td></tr>`;
+          return;
+        }
+        const head = tableContainer.querySelector('thead').offsetHeight;
+        const top = Math.max(0, tableContainer.scrollTop - head);
+        const vh = tableContainer.clientHeight || 700;
+        const s = Math.max(0, Math.floor(top / ROW_H) - OVER);
+        const e = Math.min(n, Math.ceil((top + vh) / ROW_H) + OVER);
+        if (s === this.s && e === this.e) return;
+        this.s = s; this.e = e;
+        const sp = h => `<tr class="spacer" style="height:${h}px"><td colspan="8"></td></tr>`;
+        let h = s ? sp(s * ROW_H) : '';
+        for (let i = s; i < e; i++) {
+          const r = filteredData[i], c = selectedRowIds.has(r._id);
+          h += `<tr data-id="${r._id}"${c ? ' class="row-checked"' : ''}><td><input type="checkbox"${c ? ' checked' : ''}></td>`;
+          for (let k = 0; k < COLUMNS.length; k++) {
+            const col = COLUMNS[k], v = esc(r[col]);
+            h += `<td${col === 'VALOR' ? ' class="num-col"' : ''} title="${v}">${v}</td>`;
+          }
+          h += '</tr>';
+        }
+        if (e < n) h += sp((n - e) * ROW_H);
+        tableBody.innerHTML = h;
+      }
+    };
+    let scrollPending = false;
+    tableContainer.addEventListener('scroll', () => {
+      if (scrollPending) return;
+      scrollPending = true;
+      requestAnimationFrame(() => { scrollPending = false; baseVT.render(); });
+    }, { passive: true });
+    if (window.ResizeObserver) new ResizeObserver(() => requestAnimationFrame(() => baseVT.refresh())).observe(tableContainer);
+
+    tableBody.addEventListener('change', e => {
+      const cb = e.target, tr = cb.closest('tr');
+      if (cb.type !== 'checkbox' || !tr) return;
+      const id = +tr.dataset.id;
+      cb.checked ? selectedRowIds.add(id) : selectedRowIds.delete(id);
+      tr.classList.toggle('row-checked', cb.checked);
+      syncSelectAll();
+      updateCards();
+    });
+
+    function syncSelectAll() {
+      const visibleRows = filteredData;
+      const visibleSelected = visibleRows.filter(r => selectedRowIds.has(r._id)).length;
+      selectAllRowsCheckbox.checked = visibleRows.length > 0 && visibleSelected === visibleRows.length;
+      selectAllRowsCheckbox.indeterminate = visibleSelected > 0 && visibleSelected < visibleRows.length;
+    }
+
+    selectAllRowsCheckbox.addEventListener('change', () => {
+      const checked = selectAllRowsCheckbox.checked;
+      filteredData.forEach(r => checked ? selectedRowIds.add(r._id) : selectedRowIds.delete(r._id));
+      baseVT.refresh();
+      updateCards();
+    });
+
+    function updateCards() {
+      const sel = filteredData.filter(r => selectedRowIds.has(r._id));
+      const rows = sel.length ? sel : filteredData;
+      const sum = rows.reduce((a, r) => a + r._numericValor, 0);
+      countCardLabel.textContent = sel.length ? 'Selecionados (Checkbox)' : 'Registros (Visíveis)';
+      sumCardLabel.textContent = sel.length ? 'Soma Selecionados' : 'Soma Valor (Visíveis)';
+      countCardValue.textContent = rows.length;
+      sumCardValue.textContent = formatBRL(sum);
+    }
+
+    function resetAllState() {
+      selectedRowIds.clear();
+      progSel.clear();
+      baseSortState = { key: null, dir: 'none' };
+      matrixSortState = { key: null, dir: 'none' };
+      COLUMNS.forEach(c => { fState.text[c] = ''; fState.set[c] = null; });
+      popCol = null;
+      filterPopover.classList.remove('open');
+      updateBaseSortIndicators();
+      updateMatrixSortIndicators();
+      prepareData();
+      sortBase();
+      buildSidebarValidations();
+      applyFilters();
+    }
+
+    function updateBaseSortIndicators() {
+      document.querySelectorAll('#dataTable thead th.sortable-th').forEach(th => {
+        const on = baseSortState.key === th.dataset.sortKey && baseSortState.dir !== 'none';
+        th.classList.toggle('sorted-asc', on && baseSortState.dir === 'asc');
+        th.classList.toggle('sorted-desc', on && baseSortState.dir === 'desc');
+        const ind = th.querySelector('.sort-indicator');
+        if (ind) ind.textContent = on ? (baseSortState.dir === 'asc' ? '▲' : '▼') : '⇅';
+      });
+    }
+
+    document.querySelectorAll('#dataTable thead th.sortable-th').forEach(th => {
+      th.addEventListener('click', e => {
+        if (e.target.closest('.funnel-btn')) return;
+        const k = th.dataset.sortKey;
+        if (baseSortState.key !== k) baseSortState = { key: k, dir: 'asc' };
+        else if (baseSortState.dir === 'asc') baseSortState.dir = 'desc';
+        else baseSortState = { key: null, dir: 'none' };
+        updateBaseSortIndicators();
+        sortBase();
+        applyFilters(true);
+      });
+    });
+
+    function openFilterPopover(col, btn) {
+      popCol = col;
+      popSnap = { text: fState.text[col], set: fState.set[col] ? new Set(fState.set[col]) : null };
+      popoverTitle.textContent = `Filtrar: ${col}`;
+      popoverSearchInput.value = fState.text[col];
+      const w = Math.min(300, window.innerWidth - 16);
+      const rect = btn.getBoundingClientRect();
+      filterPopover.style.width = w + 'px';
+      filterPopover.style.left = Math.max(8, Math.min(rect.left - 180, window.innerWidth - w - 8)) + 'px';
+      filterPopover.style.top = Math.max(8, Math.min(rect.bottom + 6, window.innerHeight - 400)) + 'px';
+      filterPopover.classList.add('open');
+      popList = popList || new ValueList(col, popoverList, () => !!popCol);
+      popList.col = col;
+      popList.render();
+      popoverSearchInput.focus();
+    }
+
+    function closePopover() {
+      popCol = null;
+      filterPopover.classList.remove('open');
+    }
+
+    document.querySelectorAll('.funnel-btn').forEach(btn => {
+      btn.addEventListener('click', e => { e.stopPropagation(); openFilterPopover(btn.dataset.col, btn); });
+    });
+    popoverSearchInput.addEventListener('input', () => {
+      if (!popCol) return;
+      setText(popCol, popoverSearchInput.value, 'pop');
+      popList.render();
+    });
+    popoverApplyBtn.addEventListener('click', closePopover);
+    closePopoverBtn.addEventListener('click', closePopover);
+    popoverCancelBtn.addEventListener('click', () => {
+      if (popCol) {
+        fState.text[popCol] = popSnap.text;
+        fState.set[popCol] = popSnap.set;
+        if (sideInputs[popCol]) sideInputs[popCol].value = popSnap.text;
+      }
+      closePopover();
+      applyFilters(true);
+    });
+    document.addEventListener('click', e => {
+      if (popCol && e.target.isConnected && !filterPopover.contains(e.target) && !e.target.closest('.funnel-btn')) closePopover();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && popCol) closePopover(); });
+
+    document.querySelectorAll('.condition-select').forEach(el => el.addEventListener('change', () => scheduleApply()));
+    document.querySelectorAll('.condition-textarea').forEach(el => el.addEventListener('input', () => scheduleApply(120)));
+    document.querySelectorAll('.clear-cond-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const ta = document.querySelector(`.condition-textarea[data-cond="${btn.dataset.cond}"]`);
+        if (ta) ta.value = '';
+        scheduleApply();
+      });
+    });
+
+    clearFiltersBtn.addEventListener('click', () => {
+      document.querySelectorAll('.condition-textarea').forEach(ta => { ta.value = ''; });
+      COLUMNS.forEach(c => { fState.text[c] = ''; fState.set[c] = null; if (sideInputs[c]) sideInputs[c].value = ''; });
+      progSel.clear(); progRenderList();
+      if (popCol) popoverSearchInput.value = '';
+      applyFilters();
+      showToast('Filtros limpos');
+    });
+
+    refreshBtn.addEventListener('click', async () => { await loadFromSupabase(true); });
+
+    (function initColumnResize() {
+      const table = document.getElementById('dataTable');
+      const cols = table.querySelectorAll('colgroup col');
+      const defaults = [...cols].map(c => parseInt(c.style.width, 10));
+      const MIN_W = 50;
+      const updateTableWidth = () => {
+        table.style.minWidth = [...cols].reduce((a, c) => a + parseInt(c.style.width, 10), 0) + 'px';
+      };
+      table.querySelectorAll('thead th').forEach((th, i) => {
+        if (i === 0) return;
+        const h = document.createElement('span');
+        h.className = 'col-resizer';
+        h.title = 'Arraste para redimensionar (duplo clique restaura)';
+        th.appendChild(h);
+        h.addEventListener('click', e => e.stopPropagation());
+        h.addEventListener('dblclick', e => { e.stopPropagation(); cols[i].style.width = defaults[i] + 'px'; updateTableWidth(); });
+        h.addEventListener('pointerdown', e => {
+          e.preventDefault(); e.stopPropagation();
+          const startX = e.clientX, startW = parseInt(cols[i].style.width, 10);
+          h.setPointerCapture(e.pointerId);
+          h.classList.add('dragging');
+          document.body.classList.add('col-resizing');
+          const move = ev => { cols[i].style.width = Math.max(MIN_W, startW + ev.clientX - startX) + 'px'; updateTableWidth(); };
+          const up = () => {
+            h.classList.remove('dragging');
+            document.body.classList.remove('col-resizing');
+            h.removeEventListener('pointermove', move);
+            h.removeEventListener('pointerup', up);
+            h.removeEventListener('pointercancel', up);
+          };
+          h.addEventListener('pointermove', move);
+          h.addEventListener('pointerup', up);
+          h.addEventListener('pointercancel', up);
+        });
+      });
+      updateTableWidth();
+    })();
+
+    document.getElementById('sidebarBackdrop').addEventListener('click', () => sidebar.classList.add('collapsed'));
+    if (window.matchMedia('(max-width: 900px)').matches) sidebar.classList.add('collapsed');
+
+    function parseRuleKeywords(csv) {
+      return csv
+        .split(',')
+        .map(s => stripAccents(s.trim()))
+        .filter(Boolean);
+    }
+
+    function detectYearFromFonte(fonteNorm) {
+      for (const y of YEARS) {
+        if (fonteNorm.includes(y)) return y;
+      }
+      const shortMap = { '23': '2023', '24': '2024', '25': '2025', '26': '2026', '27': '2027' };
+      for (const [shortY, fullY] of Object.entries(shortMap)) {
+        const regex = new RegExp(`(^|[^0-9])${shortY}([^0-9]|$)`);
+        if (regex.test(fonteNorm)) return fullY;
+      }
+      return null;
+    }
+
+    function getMatrixSortValue(item, sortKey) {
+      if (sortKey.includes(':')) {
+        const [grp, yr] = sortKey.split(':');
+        return item[grp]?.[yr] ?? 0;
+      }
+      return item[sortKey] ?? '';
+    }
+
+    document.querySelectorAll('#generatedMatrixTable thead th.sortable-th').forEach(th => {
+      th.addEventListener('click', () => {
+        const sortKey = th.dataset.matrixSort;
+        if (!sortKey) return;
+
+        if (matrixSortState.key !== sortKey) {
+          matrixSortState = { key: sortKey, dir: 'asc' };
+        } else if (matrixSortState.dir === 'asc') {
+          matrixSortState.dir = 'desc';
+        } else if (matrixSortState.dir === 'desc') {
+          matrixSortState = { key: null, dir: 'none' };
+        } else {
+          matrixSortState.dir = 'asc';
+        }
+
+        updateMatrixSortIndicators();
+        sortGeneratedSchoolsList();
+        renderGeneratedMatrix();
+      });
+    });
+
+    function updateMatrixSortIndicators() {
+      document.querySelectorAll('#generatedMatrixTable thead th.sortable-th').forEach(th => {
+        const ind = th.querySelector('.sort-indicator');
+        if (ind) ind.textContent = '⇅';
+        if (matrixSortState.key === th.dataset.matrixSort && matrixSortState.dir !== 'none') {
+          if (ind) ind.textContent = matrixSortState.dir === 'asc' ? '▲' : '▼';
+        }
+      });
+    }
+
+    function sortGeneratedSchoolsList() {
+      if (matrixSortState.key && matrixSortState.dir !== 'none') {
+        generatedSchoolsList.sort((a, b) =>
+          compareGeneric(getMatrixSortValue(a, matrixSortState.key), getMatrixSortValue(b, matrixSortState.key), matrixSortState.dir)
+        );
+      } else {
+        generatedSchoolsList.sort((a, b) => {
+          const cmpMun = a.municipio.localeCompare(b.municipio, 'pt-BR');
+          if (cmpMun !== 0) return cmpMun;
+          return a.escola.localeCompare(b.escola, 'pt-BR');
+        });
+      }
+    }
+
+    const genSelected = new Set();
+    const genSelCountCard = document.getElementById('genSelCountCard');
+    const genSelectAll = document.getElementById('genSelectAll');
+    const genKey = it => it.key || (it.key = (it.codigo || it.inep) ? stripAccents(it.codigo || it.inep) : `${stripAccents(it.municipio)}|${stripAccents(it.escola)}`);
+
+    function genCurrentList() {
+      const sel = generatedSchoolsList.filter(i => genSelected.has(genKey(i)));
+      return sel.length ? sel : generatedSchoolsList;
+    }
+
+    function aggregateRowsToSchools(rowsList) {
+      const faedMaintKeys = parseRuleKeywords('MANUTENCAO,BBPAG,BB DIGITAL,GERADOR');
+      const alimFedKeys = parseRuleKeywords('PNAE');
+      const alimEstKeys = parseRuleKeywords('FAED');
+
+      const schoolMap = new Map();
+
+      rowsList.forEach(row => {
+        const idPart = row['CODIGO'] || row['INEP'];
+        const key = idPart
+          ? stripAccents(idPart)
+          : `${stripAccents(row['MUNICIPIO'])}|${stripAccents(row['UNIDADE ESCOLAR'])}`;
+
+        if (!schoolMap.has(key)) {
+          schoolMap.set(key, {
+            key,
+            nte: row['NTE'],
+            municipio: row['MUNICIPIO'],
+            codigo: row['CODIGO'],
+            inep: row['INEP'],
+            escola: row['UNIDADE ESCOLAR'],
+            faed: { '2023': 0, '2024': 0, '2025': 0, '2026': 0, '2027': 0 },
+            fed: { '2023': 0, '2024': 0, '2025': 0, '2026': 0, '2027': 0 },
+            est: { '2023': 0, '2024': 0, '2025': 0, '2026': 0, '2027': 0 }
+          });
+        }
+
+        const entry = schoolMap.get(key);
+        if (!entry.inep && row['INEP']) entry.inep = row['INEP'];
+        if (!entry.codigo && row['CODIGO']) entry.codigo = row['CODIGO'];
+
+        const fonteNorm = stripAccents(row['FONTE']);
+        const year = detectYearFromFonte(fonteNorm);
+        const val = row._numericValor || 0;
+
+        if (!year) return;
+
+        if (fonteNorm.includes('GERADOR PNAE')) { entry.fed[year] += val; return; }
+        if (fonteNorm.includes('GERADOR FAED')) { entry.est[year] += val; return; }
+
+        if (faedMaintKeys.some(k => fonteNorm.includes(k))) {
+          entry.faed[year] += val;
+          return;
+        }
+
+        if (alimFedKeys.some(k => fonteNorm.includes(k))) {
+          entry.fed[year] += val;
+          return;
+        }
+
+        if (alimEstKeys.some(k => fonteNorm.includes(k))) {
+          entry.est[year] += val;
+        }
+      });
+
+      return Array.from(schoolMap.values());
+    }
+
+    function buildGeneratedMatrix(autoAccumulate = true) {
+      const checkedRows = filteredData.filter(r => selectedRowIds.has(r._id));
+      const sourceRows = checkedRows.length > 0 ? checkedRows : (COLUMNS.some(colActive) ? filteredData : []);
+
+      generatedSchoolsFull = aggregateRowsToSchools(sourceRows);
+      generatedSchoolsList = matrixApplyFilter(generatedSchoolsFull);
+      const validKeys = new Set(generatedSchoolsList.map(genKey));
+      for (const k of [...genSelected]) {
+        if (!validKeys.has(k)) genSelected.delete(k);
+      }
+
+      sortGeneratedSchoolsList();
+      renderGeneratedMatrix();
+
+      if (autoAccumulate && generatedSchoolsList.length > 0) {
+        isBahiaConsolidatedMode = false;
+        accumulateCurrentToSummary();
+      }
+    }
+
+    function updateGenCards() {
+      const list = generatedSchoolsList;
+      const sel = list.filter(i => genSelected.has(genKey(i)));
+      const t = computeTotalsForList(sel.length ? sel : list);
+      genFaedTotalCard.textContent = formatBRL(t.faed);
+      genAlimTotalCard.textContent = formatBRL(t.alim);
+      genGrandTotalCard.textContent = formatBRL(t.total);
+      genSchoolsCountBadge.textContent = sel.length
+        ? `${sel.length} de ${list.length} selecionadas`
+        : `${list.length} ${list.length === 1 ? 'escola' : 'escolas'}`;
+      genSelCountCard.textContent = `${sel.length} de ${list.length}`;
+      genSelectAll.checked = list.length > 0 && sel.length === list.length;
+      genSelectAll.indeterminate = sel.length > 0 && sel.length < list.length;
+    }
+
+    function renderGeneratedMatrix() {
+      updateMatrixFunnels();
+      if (generatedSchoolsList.length === 0) {
+        generatedMatrixBody.innerHTML = `
+          <tr>
+            <td colspan="21" class="empty-state">
+              Nenhum dado para exibir. Aplique um filtro (ou marque linhas) na aba <strong>Base / Filtros</strong> para gerar a matriz por escola, programa e ano (2023 a 2027).
+            </td>
+          </tr>`;
+        updateGenCards();
+        return;
+      }
+      let h = '';
+      generatedSchoolsList.forEach(item => {
+        const k = genKey(item), c = genSelected.has(k);
+        h += `<tr data-key="${esc(k)}"${c ? ' class="row-checked"' : ''}><td class="gen-check-td"><input type="checkbox"${c ? ' checked' : ''}></td>`;
+        [item.nte, item.municipio, item.codigo, item.inep, item.escola].forEach(t => { h += `<td>${esc(t)}</td>`; });
+        YEARS.forEach(y => { h += `<td class="num-col">${formatNumberOnly(item.faed[y])}</td>`; });
+        YEARS.forEach(y => { h += `<td class="num-col">${formatNumberOnly(item.fed[y])}</td><td class="num-col">${formatNumberOnly(item.est[y])}</td>`; });
+        h += '</tr>';
+      });
+      generatedMatrixBody.innerHTML = h;
+      updateGenCards();
+    }
+
+    generatedMatrixBody.addEventListener('change', e => {
+      const cb = e.target, tr = cb.closest('tr');
+      if (cb.type !== 'checkbox' || !tr || !tr.dataset.key) return;
+      cb.checked ? genSelected.add(tr.dataset.key) : genSelected.delete(tr.dataset.key);
+      tr.classList.toggle('row-checked', cb.checked);
+      updateGenCards();
+      if (cb.checked) {
+        isBahiaConsolidatedMode = false;
+        accumulateCurrentToSummary();
+      }
+    });
+
+    genSelectAll.addEventListener('change', () => {
+      generatedSchoolsList.forEach(i => genSelectAll.checked ? genSelected.add(genKey(i)) : genSelected.delete(genKey(i)));
+      renderGeneratedMatrix();
+      if (genSelectAll.checked) {
+        isBahiaConsolidatedMode = false;
+        accumulateCurrentToSummary();
+      }
+    });
+
+
+    // ===== Filtros dinâmicos da aba Dados Gerados (NTE, Município, Código SEC, Código INEP, Unidade Escolar) =====
+    const mpNorm = v => String(v ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    const MATRIX_FCOLS = { nte: 'NTE', municipio: 'Município', codigo: 'Código SEC', inep: 'Código INEP', escola: 'Unidade Escolar' };
+    const matrixPopover = document.getElementById('matrixPopover');
+    const mpTitle = document.getElementById('mpTitle');
+    const mpSearch = document.getElementById('mpSearch');
+    const mpList = document.getElementById('mpList');
+    let mpCol = null, mpShown = [], mpMatched = [];
+
+    function matrixApplyFilter(list) {
+      const keys = Object.keys(matrixFilters);
+      if (!keys.length) return list.slice();
+      return list.filter(it => keys.every(k => matrixFilters[k].has(String(it[k] ?? ''))));
+    }
+    function mpAllValues(col) { return new Set(generatedSchoolsFull.map(it => String(it[col] ?? ''))); }
+    function mpAvailable(col) {
+      const keys = Object.keys(matrixFilters).filter(k => k !== col);
+      const seen = new Set();
+      generatedSchoolsFull.forEach(it => { if (keys.every(k => matrixFilters[k].has(String(it[k] ?? '')))) seen.add(String(it[col] ?? '')); });
+      return [...seen].sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true, sensitivity: 'base' }));
+    }
+    function updateMatrixFunnels() {
+      document.querySelectorAll('.matrix-funnel').forEach(b => b.classList.toggle('active-filter', !!matrixFilters[b.dataset.mcol]));
+    }
+    function mpRefreshMatrix() {
+      generatedSchoolsList = matrixApplyFilter(generatedSchoolsFull);
+      sortGeneratedSchoolsList();
+      renderGeneratedMatrix();
+    }
+    function mpRender() {
+      const col = mpCol; if (!col) return;
+      const q = mpNorm(mpSearch.value), sel = matrixFilters[col];
+      mpMatched = mpAvailable(col).filter(v => !q || mpNorm(v).includes(q));
+      mpShown = mpMatched.slice(0, 300);
+      let h = '<label class="validation-item"><input type="checkbox" data-all="1"><b>(Marcar / Desmarcar Todos)</b></label>';
+      mpShown.forEach((v, i) => { h += `<label class="validation-item"><input type="checkbox" data-i="${i}"><span>${v === '' ? '(Vazio)' : esc(v)}</span></label>`; });
+      if (mpMatched.length > 300) h += `<div class="vl-more">+${mpMatched.length - 300} valores — digite para refinar</div>`;
+      if (!mpMatched.length) h += '<div class="vl-more">Nenhum valor encontrado</div>';
+      mpList.innerHTML = h;
+      let n = 0; mpMatched.forEach(v => { if (!sel || sel.has(v)) n++; });
+      const all = mpList.querySelector('[data-all]');
+      all.checked = n > 0 && n === mpMatched.length;
+      all.indeterminate = n > 0 && n < mpMatched.length;
+      mpList.querySelectorAll('[data-i]').forEach(cb => { cb.checked = !sel || sel.has(mpShown[cb.dataset.i]); });
+    }
+    function mpOpen(col, btn) {
+      mpCol = col;
+      mpTitle.textContent = `Filtrar: ${MATRIX_FCOLS[col]}`;
+      mpSearch.value = '';
+      const w = Math.min(300, window.innerWidth - 16), rect = btn.getBoundingClientRect();
+      matrixPopover.style.width = w + 'px';
+      matrixPopover.style.left = Math.max(8, Math.min(rect.left - 180, window.innerWidth - w - 8)) + 'px';
+      matrixPopover.style.top = Math.max(8, Math.min(rect.bottom + 6, window.innerHeight - 400)) + 'px';
+      matrixPopover.classList.add('open');
+      mpRender();
+      mpSearch.focus();
+    }
+    function mpClose() { mpCol = null; matrixPopover.classList.remove('open'); }
+
+    document.querySelectorAll('.matrix-funnel').forEach(btn => {
+      btn.addEventListener('click', e => { e.stopPropagation(); mpOpen(btn.dataset.mcol, btn); });
+    });
+    mpSearch.addEventListener('input', mpRender);
+    mpList.addEventListener('change', e => {
+      const col = mpCol, t = e.target; if (!col) return;
+      const total = mpAllValues(col).size;
+      let s = matrixFilters[col] ? new Set(matrixFilters[col]) : new Set(mpAllValues(col));
+      const vals = t.dataset.all ? mpMatched : [mpShown[t.dataset.i]];
+      vals.forEach(v => { if (v === undefined) return; t.checked ? s.add(v) : s.delete(v); });
+      if (s.size >= total) delete matrixFilters[col]; else matrixFilters[col] = s;
+      mpRefreshMatrix();
+      mpRender();
+    });
+    document.getElementById('mpApplyBtn').addEventListener('click', mpClose);
+    document.getElementById('mpCloseBtn').addEventListener('click', mpClose);
+    document.getElementById('mpClearBtn').addEventListener('click', () => {
+      if (mpCol) { delete matrixFilters[mpCol]; mpRefreshMatrix(); mpSearch.value = ''; mpRender(); }
+    });
+    document.addEventListener('click', e => {
+      if (mpCol && e.target.isConnected && !matrixPopover.contains(e.target) && !e.target.closest('.matrix-funnel')) mpClose();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && mpCol) mpClose(); });
+
+    async function exportSchoolsToExcel(list, fileLabel) {
+      if (!list || list.length === 0) return;
+      try { await ensureXLSX(); } catch (_) { showToast('Não foi possível carregar a biblioteca XLSX'); return; }
+
+      const headerRow = [
+        'NTE', 'Município', 'Código SEC', 'Código INEP', 'Unidade Escolar',
+        'FAED 2023', 'FAED 2024', 'FAED 2025', 'FAED 2026', 'FAED 2027',
+        'Fed23', 'Est23', 'Fed24', 'Est24', 'Fed25', 'Est25', 'Fed26', 'Est26', 'Fed27', 'Est27'
+      ];
+
+      const aoa = [headerRow];
+      list.forEach(item => {
+        aoa.push([
+          item.nte,
+          item.municipio,
+          item.codigo,
+          item.inep,
+          item.escola,
+          item.faed['2023'], item.faed['2024'], item.faed['2025'], item.faed['2026'], item.faed['2027'],
+          item.fed['2023'], item.est['2023'],
+          item.fed['2024'], item.est['2024'],
+          item.fed['2025'], item.est['2025'],
+          item.fed['2026'], item.est['2026'],
+          item.fed['2027'], item.est['2027']
+        ]);
+      });
+
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Dados Gerados');
+      XLSX.writeFile(wb, fileLabel || 'Nota_Tecnica_CDF_Dados_Gerados.xlsx');
+    }
+
+    document.getElementById('exportGenExcelBtn').addEventListener('click', () => {
+      exportSchoolsToExcel(genCurrentList(), 'Nota_Tecnica_CDF_Dados_Gerados.xlsx');
+    });
+
+    document.getElementById('exportGenPdfBtn').addEventListener('click', () => {
+      window.print();
+    });
+
+    /* ===== Aba Resumo Acumulado + Geral BAHIA (2023 a 2027) ===== */
+    const summarySheet = document.getElementById('summarySheet');
+    const sumGroupBy = document.getElementById('sumGroupBy');
+    let summaryModel = null;
+
+    function updateSummaryTabBadge() {
+      summaryTabCount.textContent = String(accumulatedSummaryItems.length);
+    }
+
+    function detectCurrentSummaryMode(list) {
+      const selMode = sumGroupBy.value;
+      if (selMode === 'nte' || selMode === 'municipio') return selMode;
+
+      if (colActive('MUNICIPIO') && !colActive('NTE')) return 'municipio';
+      if (colActive('NTE') && !colActive('MUNICIPIO')) return 'nte';
+
+      const uniqueNtes = new Set(list.map(i => stripAccents(i.nte)).filter(Boolean));
+      const uniqueMuns = new Set(list.map(i => stripAccents(i.municipio)).filter(Boolean));
+      if (uniqueMuns.size === 1 && uniqueNtes.size === 1 && colActive('MUNICIPIO')) return 'municipio';
+      if (uniqueNtes.size === 1 && uniqueMuns.size > 1) return 'nte';
+      if (uniqueMuns.size === 1) return 'municipio';
+      return 'nte';
+    }
+
+    function accumulateCurrentToSummary() {
+      const list = genCurrentList();
+      if (!list || list.length === 0) return;
+
+      // Se estava no modo BAHIA consolidado e o usuário voltou a acumular NTE/Município, reinicia a lista
+      if (accumulatedSummaryItems.length === 1 && accumulatedSummaryItems[0].type === 'bahia') {
+        accumulatedSummaryItems = [];
+      }
+
+      // Filtro por Unidade Escolar / Código SEC / INEP na Base => o Resumo trabalha por ESCOLA (nome da unidade)
+      const forcedMode = sumGroupBy.value;
+      const schoolFilterActive = ['UNIDADE ESCOLAR', 'CODIGO', 'INEP'].some(c => { try { return colActive(c); } catch (e) { return false; } });
+      const schoolSelectionActive = genSelected.size > 0 || forcedMode === 'escola' || (forcedMode === 'auto' && schoolFilterActive);
+      const mode = detectCurrentSummaryMode(list);
+      const zero = () => { const o = {}; YEARS.forEach(y => { o[y] = 0; }); return o; };
+      const batchMap = new Map();
+
+      list.forEach(it => {
+        if (schoolSelectionActive) {
+          const schoolName = String(it.escola || it.codigo || it.inep || '(escola sem nome)').trim();
+          const schoolId = `school|${genKey(it)}`;
+          batchMap.set(schoolId, {
+            id: schoolId,
+            type: 'school',
+            raw: schoolName,
+            label: schoolName,
+            shortHeader: schoolName,
+            meta: { key: genKey(it), nte: it.nte || '', municipio: it.municipio || '', codigo: it.codigo || '', inep: it.inep || '', escola: it.escola || '' },
+            schoolsCount: 1,
+            faed: { ...it.faed },
+            fed: { ...it.fed },
+            est: { ...it.est }
+          });
+          return;
+        }
+        const raw = String((mode === 'nte' ? it.nte : it.municipio) ?? '').trim() || '(sem informação)';
+        const normKey = `${mode}|${stripAccents(raw)}`;
+        let g = batchMap.get(normKey);
+        if (!g) {
+          const cleanName = mode === 'nte'
+            ? (/^nte\b/i.test(raw) ? raw.toUpperCase() : 'NTE ' + raw.toUpperCase())
+            : raw.toUpperCase();
+          const rowLabel = mode === 'nte'
+            ? cleanName
+            : (/^munic[ií]pio\b/i.test(cleanName) ? cleanName : 'MUNICÍPIO ' + cleanName);
+          const shortHeader = mode === 'nte'
+            ? 'NTE'
+            : cleanName.replace(/^MUNIC[IÍ]PIO\s+/i, '');
+
+          g = {
+            id: normKey,
+            type: mode,
+            raw,
+            label: rowLabel,
+            shortHeader,
+            schoolsCount: 0,
+            faed: zero(),
+            fed: zero(),
+            est: zero()
+          };
+          batchMap.set(normKey, g);
+        }
+        g.schoolsCount += 1;
+        YEARS.forEach(y => {
+          g.faed[y] += it.faed[y] || 0;
+          g.fed[y] += it.fed[y] || 0;
+          g.est[y] += it.est[y] || 0;
+        });
+      });
+
+      batchMap.forEach((newItem, key) => {
+        const existingIdx = accumulatedSummaryItems.findIndex(x => x.id === key);
+        if (existingIdx >= 0) {
+          accumulatedSummaryItems[existingIdx] = newItem;
+        } else {
+          accumulatedSummaryItems.push(newItem);
+        }
+      });
+
+      updateSummaryTabBadge();
+      if (document.getElementById('summaryTab').classList.contains('active')) {
+        renderSummary();
+      }
+    }
+
+    function generateBahiaConsolidatedSummary(sourceList = null) {
+      const allSchools = sourceList || aggregateRowsToSchools(rawData);
+      if (!allSchools.length) {
+        showToast('Nenhum dado disponível para consolidar BAHIA');
+        return;
+      }
+
+      const zero = () => { const o = {}; YEARS.forEach(y => { o[y] = 0; }); return o; };
+
+      const bahiaItem = {
+        id: 'bahia|geral',
+        type: 'bahia',
+        raw: 'BAHIA',
+        label: 'BAHIA',
+        shortHeader: 'BAHIA',
+        schoolsCount: allSchools.length,
+        faed: zero(),
+        fed: zero(),
+        est: zero()
+      };
+
+      allSchools.forEach(it => {
+        YEARS.forEach(y => {
+          bahiaItem.faed[y] += it.faed[y] || 0;
+          bahiaItem.fed[y] += it.fed[y] || 0;
+          bahiaItem.est[y] += it.est[y] || 0;
+        });
+      });
+
+      accumulatedSummaryItems = [bahiaItem];
+      isBahiaConsolidatedMode = true;
+      updateSummaryTabBadge();
+      renderSummary();
+      showToast(`Resumo Geral BAHIA gerado (${allSchools.length} escolas da base)`);
+    }
+
+    function buildSummaryModel() {
+      const zero = () => { const o = {}; YEARS.forEach(y => { o[y] = 0; }); return o; };
+      const rows = accumulatedSummaryItems;
+      const tot = { faed: zero(), fed: zero(), est: zero() };
+      rows.forEach(r => {
+        YEARS.forEach(y => {
+          tot.faed[y] += r.faed[y] || 0;
+          tot.fed[y] += r.fed[y] || 0;
+          tot.est[y] += r.est[y] || 0;
+        });
+      });
+
+      // Sempre exibe os 5 anos: 2023, 2024, 2025, 2026 e 2027
+      const years = ['2023', '2024', '2025', '2026', '2027'];
+      const sumYears = (obj) => years.reduce((acc, y) => acc + (obj[y] || 0), 0);
+
+      const isBahiaOnly = rows.length === 1 && rows[0].type === 'bahia';
+      let bottomCols = [];
+
+      if (isBahiaOnly) {
+        const b = rows[0];
+        bottomCols = [{
+          header: 'BAHIA',
+          isBahia: true,
+          manut: sumYears(b.faed),
+          alim: sumYears(b.fed) + sumYears(b.est)
+        }];
+      } else {
+        // Um bloco por tipo de linha que existe no Resumo (NTE, MUNICÍPIO, ESCOLA), criado conforme o que foi inserido
+        const blockDefs = [
+          { type: 'nte', header: 'NTE' },
+          { type: 'municipio', header: (rows.find(r => r.type === 'municipio' && r.summaryBlockTitle)?.summaryBlockTitle) || 'MUNICÍPIO' },
+          { type: 'school', header: (rows.find(r => r.type === 'school' && r.summaryBlockTitle)?.summaryBlockTitle) || 'ESCOLA' },
+          { type: 'bahia', header: 'BAHIA', isBahia: true }
+        ];
+        blockDefs.forEach(def => {
+          const items = rows.filter(r => r.type === def.type);
+          if (!items.length) return;
+          bottomCols.push({
+            header: def.header,
+            isBahia: !!def.isBahia,
+            manut: items.reduce((acc, r) => acc + sumYears(r.faed), 0),
+            alim: items.reduce((acc, r) => acc + sumYears(r.fed) + sumYears(r.est), 0)
+          });
+        });
+      }
+
+      const totalSchools = rows.reduce((acc, r) => acc + (r.schoolsCount || 0), 0);
+      return { rows, tot, years, bottomCols, totalSchools, isBahiaOnly };
+    }
+
+    function renderSummary() {
+      const m = summaryModel = buildSummaryModel();
+      const f = formatNumberOnly, n = m.years.length;
+      const totalCols = 1 + n * 3; // 1 + 5*3 = 16 colunas (A até P)
+      document.getElementById('sumInfoBadge').textContent = m.isBahiaOnly
+        ? `Consolidado BAHIA · ${m.totalSchools} escolas`
+        : `${m.rows.length} ${m.rows.length === 1 ? 'linha acumulada' : 'linhas acumuladas'}`;
+
+      if (!m.rows.length) {
+        summarySheet.innerHTML = '<div class="empty-state" style="color:#000">Nenhuma consulta acumulada ainda. Filtre por <strong>NTE</strong>, <strong>Município</strong> ou <strong>Unidade Escolar</strong> na aba <strong>Base / Filtros</strong> e envie para <strong>Dados Gerados</strong>, ou clique em <strong>🌎 Gerar Resumo Geral (BAHIA)</strong>.</div>';
+        return;
+      }
+
+      const cells = o => m.years.map(y => `<td class="s-num">${f(o[y])}</td>`).join('');
+      const alimCells = (a, b) => m.years.map(y => `<td class="s-num">${f(a[y])}</td><td class="s-num">${f(b[y])}</td>`).join('');
+
+      const faedTitle = m.isBahiaOnly ? 'FAED MANUTENÇÃO e outros itens' : 'FAED MANUTENÇÃO';
+      const alimTitle = m.isBahiaOnly ? 'CARTÃO PNAE - ALIMENTAÇÃO ___ CARTÃO FAED - ALIMENTAÇÃO' : 'ALIMENTAÇÃO';
+      const fedSubTitle = m.isBahiaOnly ? 'CARTÃO PNAE - FEDERAL' : 'Federal\\Agricultura Familiar - PNAE';
+      const estSubTitle = m.isBahiaOnly ? 'CARTÃO FAED - ESTADUAL' : 'Estadual - FAED';
+
+      let h = `<table class="sum-table"><thead><tr><th rowspan="3" class="s-lbl-main">REPASSES ESCOLARES</th><th colspan="${n}" class="${m.isBahiaOnly ? 's-cyan' : 's-grey'}">${faedTitle}</th><th colspan="${n * 2}" class="s-beige">${alimTitle}</th></tr>`;
+      h += `<tr>${m.years.map(y => `<th rowspan="2" class="s-grey">${y}</th>`).join('')}${m.years.map(y => `<th colspan="2" class="s-grey">${y}</th>`).join('')}</tr>`;
+      h += `<tr>${m.years.map(() => `<th class="s-grey s-sm">${fedSubTitle}</th><th class="s-grey s-sm">${estSubTitle}</th>`).join('')}</tr></thead><tbody>`;
+
+      m.rows.forEach((r, idx) => {
+        const nameAlign = m.isBahiaOnly ? 'style="text-align:center; font-weight:600;"' : '';
+        h += `<tr><td class="s-name" ${nameAlign}>${esc(r.label)} <button class="sum-row-edit-btn" data-sum-idx="${idx}" title="Editar valores desta linha" aria-label="Editar ${esc(r.label)}">✎ Editar</button><button class="sum-row-del-btn" data-sum-idx="${idx}" title="Remover esta linha do resumo" aria-label="Remover ${esc(r.label)}">✕</button></td>${cells(r.faed)}${alimCells(r.fed, r.est)}</tr>`;
+      });
+
+      const totLabelAlign = m.isBahiaOnly ? 'style="text-align:center;"' : '';
+      h += `<tr class="s-total"><td class="s-name s-grey" ${totLabelAlign}>TOTAL</td>${m.years.map(y => `<td class="s-num s-grey">${f(m.tot.faed[y])}</td>`).join('')}${m.years.map(y => `<td class="s-num s-beige">${f(m.tot.fed[y])}</td><td class="s-num s-beige">${f(m.tot.est[y])}</td>`).join('')}</tr>`;
+      h += `<tr class="s-gap"><td colspan="${totalCols}"></td></tr>`;
+
+      const bCount = m.bottomCols.length;
+      const rightFillCols = Math.max(0, totalCols - (1 + bCount));
+      const fillClass = 's-fill';
+
+      h += `<tr><td class="s-box"></td>${m.bottomCols.map(bc => `<th class="${bc.isBahia ? 's-peach' : 's-beige'}">${esc(bc.header)}</th>`).join('')}${rightFillCols > 0 ? `<td class="${fillClass}" colspan="${rightFillCols}" rowspan="3"></td>` : ''}</tr>`;
+      h += `<tr><th class="s-lbl">TOTAL GERAL MANUTENÇÃO</th>${m.bottomCols.map(bc => `<td class="s-tot-block"><b>${f(bc.manut)}</b></td>`).join('')}</tr>`;
+      h += `<tr><th class="s-lbl">TOTAL GERAL ALIMENTAÇÃO</th>${m.bottomCols.map(bc => `<td class="s-tot-block"><b>${f(bc.alim)}</b></td>`).join('')}</tr>`;
+
+      summarySheet.innerHTML = h + '</tbody></table>';
+    }
+
+    summarySheet.addEventListener('click', (e) => {
+      const editBtn = e.target.closest('.sum-row-edit-btn');
+      if (editBtn) {
+        const idx = Number(editBtn.dataset.sumIdx);
+        const item = accumulatedSummaryItems[idx];
+        if (!item) return;
+        const dialog = document.getElementById('summaryEditDialog') || (() => {
+          const el = document.createElement('dialog');
+          el.id = 'summaryEditDialog';
+          el.className = 'sum-edit-dialog';
+          el.setAttribute('aria-labelledby', 'summaryEditTitle');
+          el.innerHTML = '<form class="sum-edit-form" id="summaryEditForm"><header class="sum-edit-drag-handle" id="summaryEditDragHandle" title="Arraste para mover o formulário"><h2 id="summaryEditTitle">Editar repasses escolares</h2><span>Arraste para mover</span></header><p id="summaryEditLabel" style="margin:6px 0 14px;color:#475569"></p><div class="sum-edit-grid" id="summaryEditGrid"></div><div class="sum-edit-actions"><button type="button" class="btn" id="summaryEditCancel">Cancelar</button><button type="submit" class="btn btn-primary">Salvar alterações</button></div></form>';
+          document.body.appendChild(el);
+          const dragHandle = el.querySelector('#summaryEditDragHandle');
+          dragHandle.addEventListener('pointerdown', ev => {
+            if (ev.button !== 0) return;
+            const rect = el.getBoundingClientRect();
+            el.dataset.dragOffsetX = String(ev.clientX - rect.left);
+            el.dataset.dragOffsetY = String(ev.clientY - rect.top);
+            dragHandle.setPointerCapture(ev.pointerId);
+            el.dataset.dragging = 'true';
+            ev.preventDefault();
+          });
+          dragHandle.addEventListener('pointermove', ev => {
+            if (el.dataset.dragging !== 'true') return;
+            const maxLeft = Math.max(0, window.innerWidth - el.offsetWidth);
+            const maxTop = Math.max(0, window.innerHeight - el.offsetHeight);
+            const left = Math.min(maxLeft, Math.max(0, ev.clientX - Number(el.dataset.dragOffsetX)));
+            const top = Math.min(maxTop, Math.max(0, ev.clientY - Number(el.dataset.dragOffsetY)));
+            el.style.left = `${left}px`;
+            el.style.top = `${top}px`;
+          });
+          const stopDragging = () => { delete el.dataset.dragging; };
+          dragHandle.addEventListener('pointerup', stopDragging);
+          dragHandle.addEventListener('pointercancel', stopDragging);
+          el.querySelector('#summaryEditCancel').addEventListener('click', () => el.close());
+          el.addEventListener('click', ev => { if (ev.target === el) el.close(); });
+          el.querySelector('#summaryEditForm').addEventListener('submit', ev => {
+            ev.preventDefault();
+            const rowIndex = Number(el.dataset.rowIndex);
+            const row = accumulatedSummaryItems[rowIndex];
+            if (!row) return;
+            const editedLabel = el.querySelector('[name="rowLabel"]').value.trim();
+            if (!editedLabel) {
+              el.querySelector('[name="rowLabel"]').focus();
+              showToast('Informe o nome que será exibido na coluna Repasses Escolares');
+              return;
+            }
+            row.label = editedLabel;
+            row.raw = editedLabel;
+            if (row.type === 'school' || row.type === 'municipio') {
+              const defaultBlockTitle = row.type === 'municipio' ? 'MUNICÍPIO' : 'ESCOLA';
+              const blockTitleInput = el.querySelector('[name="summaryBlockTitle"]');
+              row.summaryBlockTitle = blockTitleInput
+                ? (blockTitleInput.value.trim() || defaultBlockTitle)
+                : (row.summaryBlockTitle || defaultBlockTitle);
+            }
+            if (row.type === 'school') row.shortHeader = editedLabel;
+            if (row.type === 'municipio') row.shortHeader = editedLabel.replace(/^MUNIC[IÍ]PIO\s+/i, '');
+            el.querySelectorAll('[data-field]').forEach(input => {
+              const [group, year] = input.dataset.field.split(':');
+              row[group][year] = parseCurrencyValue(input.value);
+            });
+            el.close();
+            renderSummary();
+            showToast('Nome e valores do resumo atualizados');
+          });
+          return el;
+        })();
+        dialog.dataset.rowIndex = String(idx);
+        delete dialog.dataset.validated;
+        let schoolBox = '';
+        if (item.type === 'school') {
+          const fromGen = (typeof generatedSchoolsFull !== 'undefined' ? generatedSchoolsFull : []).find(s => genKey(s) === String(item.id).replace(/^school\|/, ''));
+          const mt = item.meta || (fromGen ? { nte: fromGen.nte, municipio: fromGen.municipio, codigo: fromGen.codigo, inep: fromGen.inep, escola: fromGen.escola } : { escola: item.label });
+          const fld = (name, label, v, ro) => `<label class="sum-edit-field">${label}<input type="text" name="${name}" value="${esc(v || '')}" ${ro ? 'readonly tabindex="-1" style="opacity:.8"' : ''} aria-label="${label}"></label>`;
+          schoolBox = `<fieldset class="sum-edit-group"><legend>Dados da escola (Dados Gerados)</legend><div class="sum-edit-years">`
+            + fld('metaNte', 'NTE', mt.nte, true) + fld('metaMunicipio', 'Município', mt.municipio, true)
+            + fld('metaCodigo', 'Código SEC', mt.codigo, false) + fld('metaInep', 'Código INEP', mt.inep, false)
+            + fld('metaEscola', 'Unidade Escolar', mt.escola, false)
+            + `</div></fieldset>`;
+        }
+        dialog.querySelector('#summaryEditLabel').textContent = `${item.label} — dados atuais preenchidos para edição.`;
+        const groups = [{ key: 'faed', label: 'FAED manutenção' }, { key: 'fed', label: 'Alimentação federal' }, { key: 'est', label: 'Alimentação estadual' }];
+        dialog.querySelector('#summaryEditGrid').innerHTML = schoolBox
+          + `<label class="sum-edit-field">Nome exibido na coluna Repasses Escolares<input type="text" name="rowLabel" value="${esc(item.label)}" maxlength="160" required aria-label="Nome exibido na coluna Repasses Escolares"></label>`
+          + (item.type === 'school' || item.type === 'municipio' ? `<label class="sum-edit-field">Título do bloco de totais (cabeçalho inferior)<input type="text" name="summaryBlockTitle" value="${esc(item.summaryBlockTitle || (item.type === 'municipio' ? 'MUNICÍPIO' : 'ESCOLA'))}" maxlength="80" aria-label="Título do bloco de totais"></label>` : '')
+          + groups.map(group => `<fieldset class="sum-edit-group"><legend>${group.label}</legend><div class="sum-edit-years">${YEARS.map(year => `<label class="sum-edit-field">${year}<input type="text" inputmode="decimal" data-field="${group.key}:${year}" value="${formatNumberOnly(item[group.key][year] || 0)}" aria-label="${group.label}, ano ${year}"></label>`).join('')}</div></fieldset>`).join('');
+        dialog.showModal();
+        if (dialog.dataset.positioned !== 'true') {
+          const rect = dialog.getBoundingClientRect();
+          dialog.style.left = `${Math.max(0, (window.innerWidth - rect.width) / 2)}px`;
+          dialog.style.top = `${Math.max(0, (window.innerHeight - rect.height) / 2)}px`;
+          dialog.dataset.positioned = 'true';
+        }
+        dialog.querySelector('input').focus();
+        return;
+      }
+      const btn = e.target.closest('.sum-row-del-btn');
+      if (!btn) return;
+      const idx = Number(btn.dataset.sumIdx);
+      if (!Number.isNaN(idx)) {
+        accumulatedSummaryItems.splice(idx, 1);
+        if (!accumulatedSummaryItems.length) isBahiaConsolidatedMode = false;
+        updateSummaryTabBadge();
+        renderSummary();
+        showToast('Linha removida do Resumo');
+      }
+    });
+
+    document.getElementById('sumAddCurrentBtn').addEventListener('click', () => {
+      if (!generatedSchoolsList.length) {
+        buildGeneratedMatrix(false);
+      }
+      if (!generatedSchoolsList.length) {
+        showToast('Nenhum dado filtrado na base para acumular');
+        return;
+      }
+      isBahiaConsolidatedMode = false;
+      accumulateCurrentToSummary();
+      renderSummary();
+      showToast('Consulta atual acumulada no Resumo');
+    });
+
+    document.getElementById('sumGenerateBahiaBtn').addEventListener('click', () => {
+      generateBahiaConsolidatedSummary();
+    });
+
+    document.getElementById('clearSummaryBtn').addEventListener('click', () => {
+      accumulatedSummaryItems = [];
+      isBahiaConsolidatedMode = false;
+      updateSummaryTabBadge();
+      renderSummary();
+      showToast('Resumo acumulado limpo');
+    });
+
+    document.getElementById('exportSumPdfBtn').addEventListener('click', () => window.print());
+
+    document.getElementById('exportSumExcelBtn').addEventListener('click', async () => {
+      const m = summaryModel;
+      if (!m || !m.rows.length) { showToast('Não há dados no resumo para exportar'); return; }
+      try {
+        if (!window.ExcelJS) await new Promise((ok, fail) => {
+          const sc = document.createElement('script');
+          sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js';
+          sc.onload = ok; sc.onerror = fail;
+          document.head.appendChild(sc);
+        });
+      } catch (_) { showToast('Não foi possível carregar a biblioteca de exportação'); return; }
+
+      const CYAN = 'FF34C6E3', GREY = 'FFD9D9D9', BEIGE = 'FFEBF1DE', PEACH = 'FFFCE4D6';
+      const n = m.years.length, last = 1 + n * 3;
+      const wb = new ExcelJS.Workbook();
+      const ws = wb.addWorksheet('Repasses Escolares', { views: [{ showGridLines: false }] });
+      const thin = { style: 'thin', color: { argb: 'FF000000' } };
+      const box = (r1, c1, r2, c2, v, o = {}) => {
+        for (let r = r1; r <= r2; r++) for (let c = c1; c <= c2; c++) {
+          const cell = ws.getCell(r, c);
+          if (o.border !== false) cell.border = { top: thin, left: thin, bottom: thin, right: thin };
+          if (o.fill) cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: o.fill } };
+          cell.font = { name: 'Calibri', size: o.size || 10, bold: !!o.bold };
+          cell.alignment = { horizontal: o.h || 'center', vertical: 'middle', wrapText: true };
+          if (o.num) cell.numFmt = '#,##0.00';
+        }
+        ws.getCell(r1, c1).value = v;
+        if (r2 > r1 || c2 > c1) ws.mergeCells(r1, c1, r2, c2);
+      };
+
+      const faedTitle = m.isBahiaOnly ? 'FAED MANUTENÇÃO e outros itens' : 'FAED MANUTENÇÃO';
+      const alimTitle = m.isBahiaOnly ? 'CARTÃO PNAE - ALIMENTAÇÃO ___ CARTÃO FAED - ALIMENTAÇÃO' : 'ALIMENTAÇÃO';
+      const fedSubTitle = m.isBahiaOnly ? 'CARTÃO PNAE - FEDERAL' : 'Federal\\Agricultura Familiar - PNAE';
+      const estSubTitle = m.isBahiaOnly ? 'CARTÃO FAED - ESTADUAL' : 'Estadual - FAED';
+      const alimFill = BEIGE;
+
+      box(1, 1, 3, 1, 'REPASSES ESCOLARES', { fill: BEIGE, bold: true });
+      box(1, 2, 1, 1 + n, faedTitle, { fill: m.isBahiaOnly ? CYAN : GREY, bold: true });
+      box(1, 2 + n, 1, last, alimTitle, { fill: alimFill, bold: true });
+      m.years.forEach((y, i) => {
+        box(2, 2 + i, 3, 2 + i, Number(y), { fill: GREY, bold: true });
+        box(2, 2 + n + i * 2, 2, 3 + n + i * 2, Number(y), { fill: GREY, bold: true });
+        box(3, 2 + n + i * 2, 3, 2 + n + i * 2, fedSubTitle, { fill: GREY, bold: true, size: 8 });
+        box(3, 3 + n + i * 2, 3, 3 + n + i * 2, estSubTitle, { fill: GREY, bold: true, size: 8 });
+      });
+      ws.getRow(3).height = 42;
+
+      let r = 4;
+      const line = (label, faed, fed, est, o = {}) => {
+        box(r, 1, r, 1, label, { h: m.isBahiaOnly ? 'center' : 'left', bold: o.bold, fill: o.bold ? GREY : undefined });
+        m.years.forEach((y, i) => {
+          box(r, 2 + i, r, 2 + i, faed[y], { h: 'right', num: true, bold: o.bold, fill: o.bold ? GREY : undefined });
+          box(r, 2 + n + i * 2, r, 2 + n + i * 2, fed[y], { h: 'right', num: true, bold: o.bold, fill: o.bold ? alimFill : undefined });
+          box(r, 3 + n + i * 2, r, 3 + n + i * 2, est[y], { h: 'right', num: true, bold: o.bold, fill: o.bold ? alimFill : undefined });
+        });
+        r++;
+      };
+
+      m.rows.forEach(x => line(x.label, x.faed, x.fed, x.est));
+      line('TOTAL', m.tot.faed, m.tot.fed, m.tot.est, { bold: true });
+      r += 1;
+
+      const bCount = m.bottomCols.length;
+      m.bottomCols.forEach((bc, idx) => {
+        box(r, 2 + idx, r, 2 + idx, bc.header, { fill: bc.isBahia ? PEACH : BEIGE, bold: true });
+      });
+      if (last > 1 + bCount) {
+        box(r, 2 + bCount, r + 2, last, '', { fill: BEIGE, border: true });
+      }
+
+      box(r + 1, 1, r + 1, 1, 'TOTAL GERAL MANUTENÇÃO', { fill: GREY, bold: true });
+      box(r + 2, 1, r + 2, 1, 'TOTAL GERAL ALIMENTAÇÃO', { fill: GREY, bold: true });
+      m.bottomCols.forEach((bc, idx) => {
+        box(r + 1, 2 + idx, r + 1, 2 + idx, bc.manut, { h: 'center', num: true, bold: true });
+        box(r + 2, 2 + idx, r + 2, 2 + idx, bc.alim, { h: 'center', num: true, bold: true });
+      });
+
+      ws.getColumn(1).width = 32;
+      for (let c = 2; c <= last; c++) ws.getColumn(c).width = 18;
+      const buf = await wb.xlsx.writeBuffer();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+      a.download = m.isBahiaOnly ? 'Resumo_Geral_BAHIA_Repasses_Escolares.xlsx' : 'Resumo_Repasses_Escolares.xlsx';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      showToast('Resumo exportado');
+    });
+
+    function loadHistoryFromStorage() {
+      try {
+        const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
+        historyItems = raw ? JSON.parse(raw) : [];
+        if (!Array.isArray(historyItems)) historyItems = [];
+      } catch (_) {
+        historyItems = [];
+      }
+      updateHistoryBadges();
+    }
+
+    function saveHistoryToStorage() {
+      try {
+        localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(historyItems));
+      } catch (_) {
+        showToast('Aviso: limite de armazenamento local atingido');
+      }
+      updateHistoryBadges();
+    }
+
+    function updateHistoryBadges() {
+      historyCountBadge.textContent = `${historyItems.length} ${historyItems.length === 1 ? 'registro' : 'registros'}`;
+      historyTabCount.textContent = String(historyItems.length);
+    }
+
+    function computeTotalsForList(list) {
+      let faed = 0;
+      let alim = 0;
+      list.forEach(item => {
+        YEARS.forEach(y => {
+          faed += Number(item.faed?.[y] || 0);
+          alim += Number(item.fed?.[y] || 0) + Number(item.est?.[y] || 0);
+        });
+      });
+      return { faed, alim, total: faed + alim };
+    }
+
+    document.getElementById('saveHistoryBtn').addEventListener('click', () => {
+      if (generatedSchoolsList.length === 0) {
+        showToast('Não há dados gerados para salvar');
+        return;
+      }
+
+      const totals = computeTotalsForList(genCurrentList());
+      const now = new Date();
+      const entry = {
+        id: 'hist_' + Date.now(),
+        createdAt: now.toLocaleString('pt-PT'),
+        fileName: fileNameDisplay.textContent || 'Sem arquivo',
+        schoolsCount: genCurrentList().length,
+        totals,
+        schools: JSON.parse(JSON.stringify(genCurrentList()))
+      };
+
+      historyItems.unshift(entry);
+      saveHistoryToStorage();
+      renderHistoryList();
+      showToast('Salvo no Histórico com sucesso');
+    });
+
+    function renderHistoryList() {
+      updateHistoryBadges();
+      if (historyItems.length === 0) {
+        historyListContainer.innerHTML = `
+          <div class="empty-state">
+            Nenhum backup salvo ainda. Na aba <strong>Dados Gerados</strong>, clique em <strong>Salvar no Histórico</strong> para guardar uma versão e gerar PDF ou Excel quando quiser.
+          </div>`;
+        return;
+      }
+
+      historyListContainer.innerHTML = '';
+      const frag = document.createDocumentFragment();
+
+      historyItems.forEach((entry, idx) => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+
+        const meta = document.createElement('div');
+        meta.className = 'history-meta';
+        meta.innerHTML = `
+          <div class="history-title">#${historyItems.length - idx} — ${entry.createdAt} (${entry.schoolsCount} ${entry.schoolsCount === 1 ? 'escola' : 'escolas'})</div>
+          <div class="history-sub">Origem: ${esc(entry.fileName)} • FAED: <strong>${formatBRL(entry.totals.faed)}</strong> • Alim/PNAE: <strong>${formatBRL(entry.totals.alim)}</strong> • Total: <strong>${formatBRL(entry.totals.total)}</strong></div>
+        `;
+
+        const actions = document.createElement('div');
+        actions.className = 'history-actions';
+
+        const btnLoad = document.createElement('button');
+        btnLoad.className = 'btn btn-sm btn-teal';
+        btnLoad.textContent = '👁️ Carregar na Tabela';
+        btnLoad.addEventListener('click', () => {
+          switchTab('generatedTab');
+          generatedSchoolsList = JSON.parse(JSON.stringify(entry.schools));
+          generatedSchoolsFull = generatedSchoolsList.slice(); matrixFilters = {};
+          renderGeneratedMatrix();
+          showToast('Backup carregado em Dados Gerados');
+        });
+
+        const btnXlsx = document.createElement('button');
+        btnXlsx.className = 'btn btn-sm btn-primary';
+        btnXlsx.textContent = '📗 Gerar Excel';
+        btnXlsx.addEventListener('click', () => {
+          exportSchoolsToExcel(entry.schools, `Backup_CDF_${entry.id}.xlsx`);
+        });
+
+        const btnPdf = document.createElement('button');
+        btnPdf.className = 'btn btn-sm';
+        btnPdf.textContent = '📄 Gerar PDF';
+        btnPdf.addEventListener('click', () => {
+          switchTab('generatedTab');
+          generatedSchoolsList = JSON.parse(JSON.stringify(entry.schools));
+          generatedSchoolsFull = generatedSchoolsList.slice(); matrixFilters = {};
+          renderGeneratedMatrix();
+          setTimeout(() => window.print(), 120);
+        });
+
+        const btnDel = document.createElement('button');
+        btnDel.className = 'btn btn-sm btn-danger';
+        btnDel.textContent = '✕';
+        btnDel.title = 'Remover backup';
+        btnDel.addEventListener('click', () => {
+          historyItems = historyItems.filter(h => h.id !== entry.id);
+          saveHistoryToStorage();
+          renderHistoryList();
+        });
+
+        actions.appendChild(btnLoad);
+        actions.appendChild(btnXlsx);
+        actions.appendChild(btnPdf);
+        actions.appendChild(btnDel);
+
+        div.appendChild(meta);
+        div.appendChild(actions);
+        frag.appendChild(div);
+      });
+
+      historyListContainer.appendChild(frag);
+    }
+
+    document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+      historyItems = [];
+      saveHistoryToStorage();
+      renderHistoryList();
+      showToast('Histórico apagado');
+    });
+
+    syncThemeButtonLabel();
+    loadHistoryFromStorage();
+    renderHistoryList();
+    updateSummaryTabBadge();
+    loadFromSupabase(false);
+  });
+  </script>
+</body>
+</html>
